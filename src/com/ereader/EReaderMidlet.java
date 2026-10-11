@@ -106,13 +106,13 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             return;
         }
         String lower = path.toLowerCase();
-        if (lower.indexOf(".txt") >= 0 || lower.indexOf(".md") >= 0) {
+        if (lower.endsWith(".txt") || lower.endsWith(".md")) {
             Book book = new Book(displayName(path), path);
             display.setCurrent(readerCanvas);
             currentBook = book;
             readerCanvas.openBook(book);
             LibraryStore.addOrUpdate(book);
-        } else if (lower.indexOf(".epub") >= 0) {
+        } else if (lower.endsWith(".epub")) {
             try {
                 String text = EpubReader.readBook(path);
                 Book book = new Book(displayName(path), path);
@@ -121,7 +121,11 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
                 readerCanvas.openText(book.getTitle(), path, text);
                 LibraryStore.addOrUpdate(book);
             } catch (Exception ex) {
-                display.setCurrent(libraryCanvas);
+                Book errorBook = new Book(displayName(path), path);
+                currentBook = errorBook;
+                readerCanvas.openText(errorBook.getTitle(), path,
+                        "Unable to open EPUB.\n\n" + ex.toString());
+                display.setCurrent(readerCanvas);
             }
         } else {
             display.setCurrent(libraryCanvas);

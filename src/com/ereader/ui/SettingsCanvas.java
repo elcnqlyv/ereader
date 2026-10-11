@@ -35,11 +35,17 @@ public class SettingsCanvas extends Canvas {
             if (listener != null) {
                 listener.closeSettings();
             }
+        } else if (keyCode == KEY_NUM3) {
+            selectedIndex = 2;
+            applyAndNotify();
+        } else if (keyCode == KEY_NUM4) {
+            selectedIndex = 3;
+            applyAndNotify();
+        } else if (keyCode == KEY_NUM5) {
+            selectedIndex = 4;
+            applyAndNotify();
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
-            applySelection();
-            if (listener != null) {
-                listener.settingsChanged(settings);
-            }
+            applyAndNotify();
         }
         repaint();
     }
@@ -74,20 +80,29 @@ public class SettingsCanvas extends Canvas {
             (settings.getFontLevel() == Settings.FONT_LARGE ? "[x] " : "[ ] ") + "Font: Large"
         };
 
+        int rowHeight = font.getHeight() + 4;
+        int footerHeight = font.getHeight() + 6;
         int y = 24;
         for (int i = 0; i < items.length; i++) {
             if (i == selectedIndex) {
                 g.setColor(Theme.accent(settings.getTheme()));
-                g.fillRect(0, y - 2, getWidth(), 14);
+                g.fillRect(0, y - 2, getWidth(), rowHeight);
                 g.setColor(Theme.background(settings.getTheme()));
             } else {
                 g.setColor(Theme.foreground(settings.getTheme()));
             }
             g.drawString(items[i], 4, y, Graphics.TOP | Graphics.LEFT);
-            y += 16;
+            y += rowHeight;
         }
         g.setColor(Theme.accent(settings.getTheme()));
-        g.drawString("0 back  select option", 4, getHeight() - 12,
+        g.drawString("0 back  3/4/5 font", 4, getHeight() - footerHeight,
                      Graphics.TOP | Graphics.LEFT);
+    }
+
+    private void applyAndNotify() {
+        applySelection();
+        if (listener != null) {
+            listener.settingsChanged(settings);
+        }
     }
 }

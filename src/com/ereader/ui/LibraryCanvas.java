@@ -48,7 +48,7 @@ public class LibraryCanvas extends Canvas {
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
             Book selected = (Book) books.elementAt(selectedIndex);
             if (listener != null && selected.getPath() != null
-                    && selected.getPath().toLowerCase().indexOf(".txt") >= 0) {
+                    && isSupportedBook(selected.getPath())) {
                 listener.openBook(selected);
             }
         } else if (keyCode == KEY_NUM1) {
@@ -79,8 +79,9 @@ public class LibraryCanvas extends Canvas {
         g.setFont(titleFont);
         g.drawString("Library", 4, 4, Graphics.TOP | Graphics.LEFT);
 
-        int rowHeight = 16;
-        int visibleRows = Math.max(1, (getHeight() - 40) / rowHeight);
+        int rowHeight = titleFont.getHeight() + 4;
+        int footerHeight = titleFont.getHeight() + 6;
+        int visibleRows = Math.max(1, (getHeight() - 28 - footerHeight) / rowHeight);
         int first = selectedIndex >= visibleRows ? selectedIndex - visibleRows + 1 : 0;
         int last = Math.min(books.size(), first + visibleRows);
         int y = 22;
@@ -89,7 +90,7 @@ public class LibraryCanvas extends Canvas {
             String label = book.getTitle();
             if (i == selectedIndex) {
                 g.setColor(Theme.accent(settings.getTheme()));
-                g.fillRect(0, y - 2, getWidth(), 14);
+                g.fillRect(0, y - 2, getWidth(), rowHeight);
                 g.setColor(Theme.background(settings.getTheme()));
             } else {
                 g.setColor(Theme.foreground(settings.getTheme()));
@@ -99,7 +100,14 @@ public class LibraryCanvas extends Canvas {
         }
 
         g.setColor(Theme.accent(settings.getTheme()));
-        g.drawString("1 files  2 settings  * theme  # font",
-                     4, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
+        g.drawString("1 files 2 settings", 4, getHeight() - footerHeight,
+                     Graphics.TOP | Graphics.LEFT);
+        g.drawString("* theme # font", getWidth() / 2, getHeight() - footerHeight,
+                     Graphics.TOP | Graphics.LEFT);
+    }
+
+    private boolean isSupportedBook(String path) {
+        String lower = path.toLowerCase();
+        return lower.endsWith(".txt") || lower.endsWith(".md") || lower.endsWith(".epub");
     }
 }

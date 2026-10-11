@@ -134,18 +134,16 @@ public class ReaderCanvas extends Canvas {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
             repaint();
         } else if (keyCode == KEY_POUND) {
-            int next = settings.getFontLevel() + 1;
-            if (next > Settings.FONT_LARGE) {
-                next = Settings.FONT_SMALL;
-            }
-            settings.setFontLevel(next);
-            if (sourceText != null) {
-                lines = paginate(sourceText);
-                if (pageIndex >= getPageCount()) {
-                    pageIndex = Math.max(0, getPageCount() - 1);
-                    notifyPositionChanged();
-                }
-            }
+            cycleFont();
+        } else if (keyCode == KEY_NUM3) {
+            settings.setFontLevel(Settings.FONT_SMALL);
+            refreshFont();
+        } else if (keyCode == KEY_NUM4) {
+            settings.setFontLevel(Settings.FONT_MEDIUM);
+            refreshFont();
+        } else if (keyCode == KEY_NUM5) {
+            settings.setFontLevel(Settings.FONT_LARGE);
+            refreshFont();
             repaint();
         }
     }
@@ -183,8 +181,38 @@ public class ReaderCanvas extends Canvas {
         if (pageCount > 0) {
             g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, getWidth() - 70, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
         }
-        g.drawString("7 mark  8 jump", 8, getHeight() - 12,
+        g.drawString("7 mark 8 jump  #" + fontName(), 8, getHeight() - 12,
                      Graphics.TOP | Graphics.LEFT);
+    }
+
+    private void cycleFont() {
+        int next = settings.getFontLevel() + 1;
+        if (next > Settings.FONT_LARGE) {
+            next = Settings.FONT_SMALL;
+        }
+        settings.setFontLevel(next);
+        refreshFont();
+    }
+
+    private void refreshFont() {
+        if (sourceText != null) {
+            lines = paginate(sourceText);
+            if (pageIndex >= getPageCount()) {
+                pageIndex = Math.max(0, getPageCount() - 1);
+                notifyPositionChanged();
+            }
+        }
+        repaint();
+    }
+
+    private String fontName() {
+        if (settings.getFontLevel() == Settings.FONT_SMALL) {
+            return "S";
+        }
+        if (settings.getFontLevel() == Settings.FONT_LARGE) {
+            return "L";
+        }
+        return "M";
     }
 
     private Font getFontForLevel(int level) {

@@ -30,11 +30,12 @@ ant sign -Dsign.keystore=/path/to/keystore \
 
 ## Controls
 
-- Library: `1` opens the file browser, `2` opens settings.
+- Library: `1` opens the file browser, `2` opens settings, `*` toggles theme,
+  and `#` cycles font size.
 - Reader: arrows move pages, `0` returns to the library.
 - Reader: `6` goes to a page, `7` toggles a bookmark, `8` jumps to it,
-  and `9` searches forward.
-- `*` switches theme and `#` cycles font size.
+  and `9` searches (with wrap-around).
+- Reader/settings: `3`, `4`, and `5` select small, medium, and large fonts.
 
 The file browser uses JSR-75 `FileConnection` and starts at
 `file:///E:/`. EPUB files are read through the OPF spine and XHTML text is
