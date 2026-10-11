@@ -159,24 +159,15 @@ public class ReaderCanvas extends Canvas {
     private String[] paginate(String text) {
         Vector result = new Vector();
         String[] raw = splitLines(text);
+        Font font = getFontForLevel(settings.getFontLevel());
+        int availableWidth = Math.max(1, getWidth() - 16);
         for (int i = 0; i < raw.length; i++) {
             String line = raw[i];
             if (line == null || line.length() == 0) {
                 result.addElement("");
                 continue;
             }
-            int chunkSize = 24;
-            if (line.length() <= chunkSize) {
-                result.addElement(line);
-            } else {
-                for (int start = 0; start < line.length(); start += chunkSize) {
-                    int end = start + chunkSize;
-                    if (end > line.length()) {
-                        end = line.length();
-                    }
-                    result.addElement(line.substring(start, end));
-                }
-            }
+            wrapLine(line, font, availableWidth, result);
         }
         String[] array = new String[result.size()];
         for (int i = 0; i < result.size(); i++) {
@@ -196,7 +187,7 @@ public class ReaderCanvas extends Canvas {
             if (ch == '\n') {
                 lines.addElement(current.toString());
                 current.setLength(0);
-            } else {
+            } else if (ch != '\r') {
                 current.append(ch);
             }
         }
@@ -208,6 +199,35 @@ public class ReaderCanvas extends Canvas {
             result[i] = (String) lines.elementAt(i);
         }
         return result;
+    }
+
+    private void wrapLine(String line, Font font, int availableWidth, Vector result) {
+        int start = 0;
+        while (start < line.length()) {
+            int end = start;
+            int lastSpace = -1;
+            while (end < line.length()) {
+                char ch = line.charAt(end);
+                if (ch == ' ' || ch == '\t') {
+                    lastSpace = end;
+                }
+                if (font.stringWidth(line.substring(start, end + 1)) > availableWidth) {
+                    break;
+                }
+                end++;
+            }
+            if (end == line.length()) {
+                result.addElement(line.substring(start));
+                return;
+            }
+            int splitAt = lastSpace > start ? lastSpace : Math.max(start + 1, end);
+            result.addElement(line.substring(start, splitAt));
+            start = splitAt;
+            while (start < line.length()
+                    && (line.charAt(start) == ' ' || line.charAt(start) == '\t')) {
+                start++;
+            }
+        }
     }
 
     private int getPageCount() {
