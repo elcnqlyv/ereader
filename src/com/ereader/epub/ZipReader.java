@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
 
@@ -30,47 +31,100 @@ public final class ZipReader {
         try {
             DataInputStream data = new DataInputStream(input);
             while (true) {
-                int signature;
-                try {
-                    signature = readLittleEndianInt(data);
-                } catch (java.io.EOFException endOfFile) {
+                EntryHeader header = readHeader(data);
+                if (header == null) {
                     return null;
                 }
-                if (signature != LOCAL_SIGNATURE) {
-                    return null;
-                }
-                data.readUnsignedByte();
-                data.readUnsignedByte();
-                int flags = readLittleEndianShort(data);
-                int method = readLittleEndianShort(data);
-                skipFully(data, 8);
-                long compressedSize = readLittleEndianInt(data) & 0xffffffffL;
-                long uncompressedSize = readLittleEndianInt(data) & 0xffffffffL;
-                int nameLength = readLittleEndianShort(data);
-                int extraLength = readLittleEndianShort(data);
-                byte[] nameBytes = new byte[nameLength];
-                data.readFully(nameBytes);
-                skipFully(data, extraLength);
-                String name = Utf8.decode(nameBytes);
-
-                if (wantedName.equals(name)) {
-                    if ((flags & 0x08) != 0) {
-                        byte[] result = inflateUnknownSize(data, method, uncompressedSize);
+                if (wantedName.equals(header.name)) {
+                    byte[] value = readValue(data, header);
+                    if (header.hasDescriptor()) {
                         skipDataDescriptor(data);
-                        return result;
                     }
-                    return inflate(new LimitedInputStream(data, compressedSize),
-                            method, uncompressedSize);
+                    return value;
                 }
-                if ((flags & 0x08) != 0) {
-                    skipUnknownSizeEntry(data, method, uncompressedSize);
-                    skipDataDescriptor(data);
-                } else {
-                    skipFully(data, compressedSize);
-                }
+                skipEntry(data, header);
             }
         } finally {
             input.close();
+        }
+    }
+
+    public static Hashtable readEntries(InputConnection connection, String[] wantedNames)
+            throws IOException {
+        Hashtable wanted = new Hashtable();
+        Hashtable result = new Hashtable();
+        for (int i = 0; i < wantedNames.length; i++) {
+            wanted.put(wantedNames[i], wantedNames[i]);
+        }
+        InputStream input = connection.openInputStream();
+        try {
+            DataInputStream data = new DataInputStream(input);
+            while (result.size() < wanted.size()) {
+                EntryHeader header = readHeader(data);
+                if (header == null) {
+                    break;
+                }
+                if (wanted.get(header.name) != null) {
+                    result.put(header.name, readValue(data, header));
+                    if (header.hasDescriptor()) {
+                        skipDataDescriptor(data);
+                    }
+                } else {
+                    skipEntry(data, header);
+                }
+            }
+            return result;
+        } finally {
+            input.close();
+        }
+    }
+
+    private static EntryHeader readHeader(DataInputStream data) throws IOException {
+        int signature;
+        try {
+            signature = readLittleEndianInt(data);
+        } catch (java.io.EOFException endOfFile) {
+            return null;
+        }
+        if (signature != LOCAL_SIGNATURE) {
+            return null;
+        }
+        data.readUnsignedByte();
+        data.readUnsignedByte();
+        int flags = readLittleEndianShort(data);
+        int method = readLittleEndianShort(data);
+        skipFully(data, 8);
+        long compressedSize = readLittleEndianInt(data) & 0xffffffffL;
+        long uncompressedSize = readLittleEndianInt(data) & 0xffffffffL;
+        int nameLength = readLittleEndianShort(data);
+        int extraLength = readLittleEndianShort(data);
+        byte[] nameBytes = new byte[nameLength];
+        data.readFully(nameBytes);
+        skipFully(data, extraLength);
+        return new EntryHeader(Utf8.decode(nameBytes), flags, method,
+                compressedSize, uncompressedSize);
+    }
+
+    private static byte[] readValue(InputStream input, EntryHeader header) throws IOException {
+        if (header.hasDescriptor()) {
+            if (header.method != 8) {
+                throw new IOException("ZIP stored entries with data descriptors are unsupported");
+            }
+            return inflateDeflated(input, header.uncompressedSize);
+        }
+        return inflate(new LimitedInputStream(input, header.compressedSize),
+                header.method, header.uncompressedSize);
+    }
+
+    private static void skipEntry(InputStream input, EntryHeader header) throws IOException {
+        if (header.hasDescriptor()) {
+            if (header.method != 8) {
+                throw new IOException("ZIP stored entries with data descriptors are unsupported");
+            }
+            inflateDeflated(input, header.uncompressedSize);
+            skipDataDescriptor((DataInputStream) input);
+        } else {
+            skipFully(input, header.compressedSize);
         }
     }
 
@@ -90,22 +144,6 @@ public final class ZipReader {
             output.write(buffer, 0, count);
         }
         return output.toByteArray();
-    }
-
-    private static byte[] inflateUnknownSize(InputStream input, int method,
-            long expectedSize) throws IOException {
-        if (method != 8) {
-            throw new IOException("ZIP stored entries with data descriptors are unsupported");
-        }
-        return inflateDeflated(input, expectedSize);
-    }
-
-    private static void skipUnknownSizeEntry(InputStream input, int method,
-            long expectedSize) throws IOException {
-        if (method != 8) {
-            throw new IOException("ZIP stored entries with data descriptors are unsupported");
-        }
-        inflateDeflated(input, expectedSize);
     }
 
     private static byte[] inflateDeflated(InputStream input, long expectedSize)
@@ -165,6 +203,27 @@ public final class ZipReader {
                 skipped = 1;
             }
             count -= skipped;
+        }
+    }
+
+    private static final class EntryHeader {
+        final String name;
+        final int flags;
+        final int method;
+        final long compressedSize;
+        final long uncompressedSize;
+
+        EntryHeader(String name, int flags, int method, long compressedSize,
+                long uncompressedSize) {
+            this.name = name;
+            this.flags = flags;
+            this.method = method;
+            this.compressedSize = compressedSize;
+            this.uncompressedSize = uncompressedSize;
+        }
+
+        boolean hasDescriptor() {
+            return (flags & 0x08) != 0;
         }
     }
 
