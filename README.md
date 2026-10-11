@@ -40,4 +40,5 @@ ant sign -Dsign.keystore=/path/to/keystore \
 
 The file browser uses JSR-75 `FileConnection` and starts at
 `file:///E:/`. EPUB files are read through the OPF spine and XHTML text is
-rendered alongside plain text and Markdown files.
+rendered alongside plain text and Markdown files. Opening an EPUB may request
+file access once; accept that request to allow the book to be read.

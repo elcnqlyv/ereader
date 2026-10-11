@@ -2,43 +2,52 @@ package com.ereader.epub;
 
 import com.ereader.util.Utf8;
 import java.io.IOException;
+import javax.microedition.io.Connector;
+import javax.microedition.io.InputConnection;
 
 public final class EpubReader {
     private EpubReader() {
     }
 
     public static String readFirstChapter(String epubPath) throws IOException {
-        byte[] container = ZipReader.readEntry(epubPath, "META-INF/container.xml");
+        InputConnection connection = (InputConnection) Connector.open(epubPath, Connector.READ);
+        try {
+            byte[] container = ZipReader.readEntry(connection, "META-INF/container.xml");
         if (container == null) {
             throw new IOException("EPUB container.xml not found");
         }
         String opfPath = ContainerParser.findRootfile(container);
-        byte[] opf = ZipReader.readEntry(epubPath, opfPath);
+        byte[] opf = ZipReader.readEntry(connection, opfPath);
         if (opf == null) {
             throw new IOException("EPUB package file not found");
         }
         String chapterPath = OpfParser.firstSpinePath(opf, opfPath);
-        byte[] chapter = ZipReader.readEntry(epubPath, chapterPath);
+        byte[] chapter = ZipReader.readEntry(connection, chapterPath);
         if (chapter == null) {
             throw new IOException("EPUB chapter not found");
         }
         return XhtmlStripper.extract(Utf8.decode(chapter));
+        } finally {
+            connection.close();
+        }
     }
 
     public static String readBook(String epubPath) throws IOException {
-        byte[] container = ZipReader.readEntry(epubPath, "META-INF/container.xml");
+        InputConnection connection = (InputConnection) Connector.open(epubPath, Connector.READ);
+        try {
+        byte[] container = ZipReader.readEntry(connection, "META-INF/container.xml");
         if (container == null) {
             throw new IOException("EPUB container.xml not found");
         }
         String opfPath = ContainerParser.findRootfile(container);
-        byte[] opf = ZipReader.readEntry(epubPath, opfPath);
+        byte[] opf = ZipReader.readEntry(connection, opfPath);
         if (opf == null) {
             throw new IOException("EPUB package file not found");
         }
         String[] chapters = OpfParser.spinePaths(opf, opfPath);
         StringBuffer book = new StringBuffer();
         for (int i = 0; i < chapters.length; i++) {
-            byte[] chapter = ZipReader.readEntry(epubPath, chapters[i]);
+            byte[] chapter = ZipReader.readEntry(connection, chapters[i]);
             if (chapter == null) {
                 continue;
             }
@@ -51,5 +60,8 @@ public final class EpubReader {
             throw new IOException("EPUB has no readable chapters");
         }
         return book.toString();
+        } finally {
+            connection.close();
+        }
     }
 }

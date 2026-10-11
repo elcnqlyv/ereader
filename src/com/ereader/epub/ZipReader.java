@@ -18,10 +18,18 @@ public final class ZipReader {
     }
 
     public static byte[] readEntry(String epubPath, String wantedName) throws IOException {
-        InputConnection connection = null;
+        InputConnection connection = (InputConnection) Connector.open(epubPath, Connector.READ);
+        try {
+            return readEntry(connection, wantedName);
+        } finally {
+            connection.close();
+        }
+    }
+
+    public static byte[] readEntry(InputConnection connection, String wantedName)
+            throws IOException {
         InputStream input = null;
         try {
-            connection = (InputConnection) Connector.open(epubPath, Connector.READ);
             input = connection.openInputStream();
             DataInputStream data = new DataInputStream(input);
             while (true) {
@@ -67,16 +75,7 @@ public final class ZipReader {
             }
         } finally {
             if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException ignored) {
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (IOException ignored) {
-                }
+                input.close();
             }
         }
     }
