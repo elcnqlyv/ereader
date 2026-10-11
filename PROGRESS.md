@@ -116,6 +116,10 @@ export PATH=$JAVA_HOME/bin:$PATH
   enumeration from the default `file:///E:/` root.
 - It excludes the reader, EPUB parsing, KXML, and JZlib.
 
+The browser probe can enumerate files and return to the library. Its original
+`openPath()` callback was deliberately empty, so selecting a file had no
+visible result; the probe now displays the selected path to test that handoff.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.
