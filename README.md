@@ -34,12 +34,12 @@ ant sign -Dsign.keystore=/path/to/keystore \
 - Library: `1` opens the file browser, `2` opens settings, `*` toggles theme,
   and `#` cycles font size.
 - Reader: arrows move pages, `0` returns to the library.
-- Reader: `6` goes to a page, `7` toggles a bookmark, `8` jumps to it,
-  and `9` searches (with wrap-around).
+- Reader: `2` opens the table of contents, `6` goes to a page, `7` toggles a
+  bookmark, `8` jumps to it, and `9` searches (with wrap-around).
 - Reader/settings: `3`, `4`, and `5` select small, medium, and large fonts.
 The reader always shows `0 back` in its footer. EPUB chapter/TOC navigation is
-not yet exposed as a separate menu; chapters are currently combined into one
-reading stream.
+available with `2`; chapters remain combined into one reading stream after a
+TOC selection.
 
 The file browser uses JSR-75 `FileConnection` and starts at
 `file:///E:/`. EPUB files are read through the OPF spine and XHTML text is

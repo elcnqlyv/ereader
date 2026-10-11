@@ -2,6 +2,7 @@ package com.ereader.ui;
 
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
+import com.ereader.epub.TocEntry;
 import com.ereader.store.BookmarkStore;
 import com.ereader.util.Utf8;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +20,7 @@ public class ReaderCanvas extends Canvas {
         void closeReader();
         void openSearch();
         void openPagePrompt();
+        void openToc();
     }
 
     private Settings settings;
@@ -28,6 +30,8 @@ public class ReaderCanvas extends Canvas {
     private String[] lines;
     private int pageIndex;
     private ReaderListener listener;
+    private int localBookmark = -1;
+    private TocEntry[] tocEntries = new TocEntry[0];
 
     public ReaderCanvas(Settings settings) {
         this.settings = settings;
@@ -45,6 +49,7 @@ public class ReaderCanvas extends Canvas {
         title = book.getTitle();
         currentPath = book.getPath();
         pageIndex = book.getLastPosition();
+        localBookmark = BookmarkStore.findPage(currentPath);
         loadFromPath(currentPath);
     }
 
@@ -73,6 +78,7 @@ public class ReaderCanvas extends Canvas {
         lines = paginate(sourceText);
         if (pageIndex >= getPageCount()) {
             pageIndex = 0;
+            localBookmark = BookmarkStore.findPage(currentPath);
         }
         repaint();
     }
@@ -112,17 +118,23 @@ public class ReaderCanvas extends Canvas {
             if (listener != null) {
                 listener.closeReader();
             }
-        } else if (keyCode == KEY_NUM7) {
-            BookmarkStore.toggle(currentPath, title, pageIndex);
+        } else if (keyCode == KEY_NUM7 || keyCode == '7') {
+            boolean marked = BookmarkStore.toggle(currentPath, title, pageIndex);
+            localBookmark = marked ? pageIndex : -1;
             repaint();
-        } else if (keyCode == KEY_NUM8) {
-            int bookmarkedPage = BookmarkStore.findPage(currentPath);
+        } else if (keyCode == KEY_NUM8 || keyCode == '8') {
+            int bookmarkedPage = localBookmark >= 0 ? localBookmark
+                    : BookmarkStore.findPage(currentPath);
             if (bookmarkedPage >= 0 && bookmarkedPage < getPageCount()) {
                 pageIndex = bookmarkedPage;
                 notifyPositionChanged();
                 repaint();
             }
-        } else if (keyCode == KEY_NUM9) {
+        } else if (keyCode == KEY_NUM2 || keyCode == '2') {
+            if (listener != null) {
+                listener.openToc();
+            }
+        } else if (keyCode == KEY_NUM9 || keyCode == '9') {
             if (listener != null) {
                 listener.openSearch();
             }
@@ -158,13 +170,14 @@ public class ReaderCanvas extends Canvas {
 
         int lineHeight = font.getHeight() + 2;
         int footerHeight = (font.getHeight() * 3) + 8;
-        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
+        int headerHeight = font.getHeight() + 6;
+        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - headerHeight);
         int maxLines = pageHeight / lineHeight;
         int start = pageIndex * maxLines;
         int end = start + maxLines;
-        int y = 10;
+        int y = headerHeight;
 
-        g.drawString(fitTitle(title == null ? "Reader" : title, getWidth() - 88),
+        g.drawString(fitTitle(title == null ? "Reader" : title, getWidth() - 16),
                 8, 4, Graphics.TOP | Graphics.LEFT);
         if (lines != null) {
             for (int i = start; i < end && i < lines.length; i++) {
@@ -184,7 +197,8 @@ public class ReaderCanvas extends Canvas {
             g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, 8, footerY,
                     Graphics.TOP | Graphics.LEFT);
         }
-        g.drawString("7 mark 8 jump # " + fontName(), 8,
+        g.drawString("2 TOC 7 " + (localBookmark >= 0 ? "unmark" : "mark")
+                + " 8 jump", 8,
                 footerY + font.getHeight() + 2, Graphics.TOP | Graphics.LEFT);
         g.drawString("0 back", 8, footerY + (font.getHeight() * 2) + 4,
                 Graphics.TOP | Graphics.LEFT);
@@ -311,7 +325,8 @@ public class ReaderCanvas extends Canvas {
         Font font = getFontForLevel(settings.getFontLevel());
         int lineHeight = font.getHeight() + 2;
         int footerHeight = (font.getHeight() * 3) + 8;
-        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
+        int headerHeight = font.getHeight() + 6;
+        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - headerHeight);
         int maxLines = pageHeight / lineHeight;
         return (lines.length + maxLines - 1) / Math.max(1, maxLines);
     }
@@ -368,5 +383,28 @@ public class ReaderCanvas extends Canvas {
             }
         } catch (Exception ignored) {
         }
+    }
+
+    public void setTableOfContents(TocEntry[] entries) {
+        tocEntries = entries == null ? new TocEntry[0] : entries;
+    }
+
+    public void selectTocEntry(int index) {
+        if (index < 0 || index >= tocEntries.length || sourceText == null) {
+            return;
+        }
+        int offset = tocEntries[index].getCharacterOffset();
+        int approximateLine = 0;
+        for (int i = 0; i < offset && i < sourceText.length(); i++) {
+            if (sourceText.charAt(i) == '\n') {
+                approximateLine++;
+            }
+        }
+        Font font = getFontForLevel(settings.getFontLevel());
+        int maxLines = Math.max(1, (getHeight() - (font.getHeight() * 3 + 8)
+                - (font.getHeight() + 6)) / (font.getHeight() + 2));
+        pageIndex = Math.min(getPageCount() - 1, approximateLine / maxLines);
+        notifyPositionChanged();
+        repaint();
     }
 }

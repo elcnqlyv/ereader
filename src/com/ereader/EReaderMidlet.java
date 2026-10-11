@@ -3,6 +3,7 @@ package com.ereader;
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
 import com.ereader.epub.EpubReader;
+import com.ereader.epub.TocEntry;
 import com.ereader.store.LibraryStore;
 import com.ereader.store.SettingsStore;
 import com.ereader.ui.FileBrowserCanvas;
@@ -11,13 +12,15 @@ import com.ereader.ui.ReaderCanvas;
 import com.ereader.ui.SearchCanvas;
 import com.ereader.ui.PageCanvas;
 import com.ereader.ui.SettingsCanvas;
+import com.ereader.ui.TocCanvas;
 import java.util.Vector;
 import javax.microedition.lcdui.Display;
 import javax.microedition.midlet.MIDlet;
 
 public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
         FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener,
-        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener, PageCanvas.PageListener {
+        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener, PageCanvas.PageListener,
+        TocCanvas.Listener {
 
     private Display display;
     private Settings settings;
@@ -27,6 +30,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     private SettingsCanvas settingsCanvas;
     private SearchCanvas searchCanvas;
     private PageCanvas pageCanvas;
+    private TocCanvas tocCanvas;
     private Book currentBook;
 
     public void startApp() {
@@ -45,6 +49,8 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             searchCanvas.setSearchListener(this);
             pageCanvas = new PageCanvas();
             pageCanvas.setPageListener(this);
+            tocCanvas = new TocCanvas(settings);
+            tocCanvas.setListener(this);
         }
         display.setCurrent(libraryCanvas);
     }
@@ -119,6 +125,11 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
                 display.setCurrent(readerCanvas);
                 currentBook = book;
                 readerCanvas.openText(book.getTitle(), path, text);
+                try {
+                    readerCanvas.setTableOfContents(EpubReader.readTableOfContents(path));
+                } catch (Exception ignored) {
+                    readerCanvas.setTableOfContents(new TocEntry[0]);
+                }
                 LibraryStore.addOrUpdate(book);
             } catch (Exception ex) {
                 Book errorBook = new Book(displayName(path), path);
@@ -196,6 +207,25 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     }
 
     public void cancelPage() {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
+        }
+    }
+
+    public void openToc() {
+        if (display != null) {
+            display.setCurrent(tocCanvas);
+        }
+    }
+
+    public void selectTocEntry(int index) {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
+            readerCanvas.selectTocEntry(index);
+        }
+    }
+
+    public void closeToc() {
         if (display != null) {
             display.setCurrent(readerCanvas);
         }

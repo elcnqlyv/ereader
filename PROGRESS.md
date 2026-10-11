@@ -175,6 +175,9 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - replaced the JZlib input loop with a finished-state loop and final empty-input flush, matching the working J2ME inflater pattern used by MPGram-derived code
 - changed compressed-input delivery to one-byte bounded reads so the Asha cannot lose ZIP descriptor or next-entry bytes through stream read-ahead
 - regenerated the icon from the newer supplied artwork as a transparent RGBA PNG; the previous indexed conversion retained the light background
+- reserved a real header band so long file names cannot overlap reader text
+- added reliable visible bookmark state with numeric-key fallbacks for mark/jump
+- added an EPUB table-of-contents screen built from spine chapter headings and chapter positions
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
