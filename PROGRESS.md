@@ -143,6 +143,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - changing reader font size recalculates wrapping and keeps the page in range
 - file browser filters to supported text books and library entries use readable filenames
 - settings screen shows the active theme and font choice
+- EPUB foundation dependencies and streaming ZIP/XML helpers are now present
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
