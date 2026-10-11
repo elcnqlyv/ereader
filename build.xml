@@ -290,6 +290,69 @@ MIDlet-Jar-Size: ${library.jar.size}
 </echo>
     </target>
 
+    <target name="screens-clean">
+        <delete dir="${build.dir}/screens-classes" />
+        <delete dir="${build.dir}/screens-preverified" />
+        <delete file="${dist.dir}/ereader-screens-probe.jar" />
+        <delete file="${dist.dir}/ereader-screens-probe.jad" />
+    </target>
+
+    <target name="screens-compile" depends="screens-clean">
+        <mkdir dir="${build.dir}/screens-classes" />
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/screens-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="com/ereader/model/Book.java" />
+            <include name="com/ereader/model/Settings.java" />
+            <include name="com/ereader/store/LibraryStore.java" />
+            <include name="com/ereader/util/Utf8.java" />
+            <include name="com/ereader/ui/Theme.java" />
+            <include name="com/ereader/ui/LibraryCanvas.java" />
+            <include name="com/ereader/ui/SettingsCanvas.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <javac srcdir="diagnostic/screens-src"
+               destdir="${build.dir}/screens-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${build.dir}/screens-classes"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="screens-preverify" depends="screens-compile">
+        <mkdir dir="${build.dir}/screens-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/screens.pro" />
+        </java>
+    </target>
+
+    <target name="screens" depends="screens-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-screens-probe.jar"
+             basedir="${build.dir}/screens-preverified"
+             manifest="diagnostic/SCREENS-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-screens-probe.jar" property="screens.jar.size" />
+        <echo file="${dist.dir}/ereader-screens-probe.jad">MIDlet-1: EReader screens probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader screens probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-screens-probe.jar
+MIDlet-Jar-Size: ${screens.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />

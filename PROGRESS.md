@@ -109,6 +109,14 @@ export PATH=$JAVA_HOME/bin:$PATH
   rendering with the exact EReader MIDlet class name.
 - It excludes JSR-75, the reader, EPUB parsing, KXML, and JZlib.
 
+### 🔬 2026-10-11 — Added a library/settings screen probe
+
+- Added `ant screens`, producing `dist/ereader-screens-probe.jar`.
+- The library probe intentionally had empty callbacks, so settings and file
+  selection were not expected to work there.
+- This probe wires `LibraryCanvas` to the real `SettingsCanvas`; it still
+  excludes JSR-75, the reader, EPUB parsing, KXML, and JZlib.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed
