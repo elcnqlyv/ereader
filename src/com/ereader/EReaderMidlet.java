@@ -97,7 +97,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             return;
         }
         if (path.toLowerCase().indexOf(".txt") >= 0 || path.toLowerCase().indexOf(".md") >= 0) {
-            Book book = new Book(path, path);
+            Book book = new Book(displayName(path), path);
             display.setCurrent(readerCanvas);
             currentBook = book;
             readerCanvas.openBook(book);
@@ -105,6 +105,18 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         } else {
             display.setCurrent(libraryCanvas);
         }
+    }
+
+    private String displayName(String path) {
+        int end = path.length();
+        if (end > 0 && path.charAt(end - 1) == '/') {
+            end--;
+        }
+        int slash = path.lastIndexOf('/', end - 1);
+        if (slash >= 0 && slash + 1 < end) {
+            return path.substring(slash + 1, end);
+        }
+        return path;
     }
 
     public void settingsChanged(Settings settings) {

@@ -141,6 +141,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - file-browser listings keep the selected row visible in long directories
 - library listings keep the selected row visible and ignore the empty-library placeholder
 - changing reader font size recalculates wrapping and keeps the page in range
+- file browser filters to supported text books and library entries use readable filenames
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 

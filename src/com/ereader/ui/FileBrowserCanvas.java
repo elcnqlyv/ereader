@@ -51,8 +51,12 @@ public class FileBrowserCanvas extends Canvas {
             Enumeration entries = connection.list();
             while (entries.hasMoreElements()) {
                 String name = (String) entries.nextElement();
-                pathList.addElement(currentPath + name);
-                labelList.addElement(name);
+                String path = currentPath + name;
+                if (name.charAt(name.length() - 1) == '/'
+                        || isSupportedBook(name)) {
+                    pathList.addElement(path);
+                    labelList.addElement(name);
+                }
             }
         } catch (Exception ex) {
             labelList.addElement("Unable to read " + currentPath);
@@ -73,6 +77,11 @@ public class FileBrowserCanvas extends Canvas {
             labels[i] = (String) labelList.elementAt(i);
         }
         selectedIndex = 0;
+    }
+
+    private boolean isSupportedBook(String name) {
+        String lower = name.toLowerCase();
+        return lower.endsWith(".txt") || lower.endsWith(".md");
     }
 
     protected void keyPressed(int keyCode) {
