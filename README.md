@@ -52,6 +52,7 @@ that require descriptor-based installation. The JAR also declares `/logo.png`
 as its MIDlet icon.
 
 The packaged logo is used as the application icon. It is not drawn in the
-upper-right corner of the reader screens. Release builds force-clean their
-output directory so obsolete smoke-test classes cannot be carried into the
-JAR.
+upper-right corner of the reader screens. The icon uses an opaque indexed PNG
+format for compatibility with the Asha launcher. Release builds force-clean
+their output directory so obsolete smoke-test classes cannot be carried into
+the JAR.
