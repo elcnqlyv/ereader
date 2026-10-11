@@ -150,7 +150,7 @@ public final class ZipReader {
                 com.jcraft.jzlib.JZlib.MAX_WBITS, true);
         ByteArrayOutputStream output = new ByteArrayOutputStream(
                 (int) Math.min(expectedSize, 32768));
-        byte[] compressed = new byte[512];
+        byte[] compressed = new byte[1];
         byte[] decompressed = new byte[512];
         int count = -1;
         boolean inputEnded = false;
