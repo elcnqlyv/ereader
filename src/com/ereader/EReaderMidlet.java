@@ -39,16 +39,6 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             settings = SettingsStore.load();
             libraryCanvas = new LibraryCanvas(settings);
             libraryCanvas.setBookSelectionListener(this);
-            readerCanvas = new ReaderCanvas(settings);
-            readerCanvas.setReaderListener(this);
-            settingsCanvas = new SettingsCanvas(settings);
-            settingsCanvas.setSettingsChangeListener(this);
-            searchCanvas = new SearchCanvas();
-            searchCanvas.setSearchListener(this);
-            pageCanvas = new PageCanvas();
-            pageCanvas.setPageListener(this);
-            tocCanvas = new TocCanvas(settings);
-            tocCanvas.setListener(this);
         }
         display.setCurrent(libraryCanvas);
     }
@@ -70,6 +60,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         if (display == null) {
             return;
         }
+        ensureReader();
         display.setCurrent(readerCanvas);
         currentBook = book;
         readerCanvas.openBook(book);
@@ -89,6 +80,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
 
     public void openSettings() {
         if (display != null) {
+            ensureSettings();
             display.setCurrent(settingsCanvas);
         }
     }
@@ -116,6 +108,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         String lower = path.toLowerCase();
         if (lower.endsWith(".txt") || lower.endsWith(".md")) {
             Book book = new Book(displayName(path), path);
+            ensureReader();
             display.setCurrent(readerCanvas);
             currentBook = book;
             readerCanvas.openBook(book);
@@ -124,6 +117,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             try {
                 String text = EpubReader.readBook(path);
                 Book book = new Book(displayName(path), path);
+                ensureReader();
                 display.setCurrent(readerCanvas);
                 currentBook = book;
                 readerCanvas.openText(book.getTitle(), path, text);
@@ -135,6 +129,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
                 LibraryStore.addOrUpdate(book);
             } catch (Exception ex) {
                 Book errorBook = new Book(displayName(path), path);
+                ensureReader();
                 currentBook = errorBook;
                 readerCanvas.openText(errorBook.getTitle(), path,
                         "Unable to open EPUB.\n\n" + ex.toString());
@@ -178,6 +173,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
 
     public void openSearch() {
         if (display != null) {
+            ensureSearch();
             display.setCurrent(searchCanvas);
         }
     }
@@ -197,6 +193,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
 
     public void openPagePrompt() {
         if (display != null) {
+            ensurePagePrompt();
             display.setCurrent(pageCanvas);
         }
     }
@@ -216,6 +213,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
 
     public void openToc() {
         if (display != null) {
+            ensureToc();
             display.setCurrent(tocCanvas);
         }
     }
@@ -230,6 +228,41 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     public void closeToc() {
         if (display != null) {
             display.setCurrent(readerCanvas);
+        }
+    }
+
+    private void ensureReader() {
+        if (readerCanvas == null) {
+            readerCanvas = new ReaderCanvas(settings);
+            readerCanvas.setReaderListener(this);
+        }
+    }
+
+    private void ensureSettings() {
+        if (settingsCanvas == null) {
+            settingsCanvas = new SettingsCanvas(settings);
+            settingsCanvas.setSettingsChangeListener(this);
+        }
+    }
+
+    private void ensureSearch() {
+        if (searchCanvas == null) {
+            searchCanvas = new SearchCanvas();
+            searchCanvas.setSearchListener(this);
+        }
+    }
+
+    private void ensurePagePrompt() {
+        if (pageCanvas == null) {
+            pageCanvas = new PageCanvas();
+            pageCanvas.setPageListener(this);
+        }
+    }
+
+    private void ensureToc() {
+        if (tocCanvas == null) {
+            tocCanvas = new TocCanvas(settings);
+            tocCanvas.setListener(this);
         }
     }
 }

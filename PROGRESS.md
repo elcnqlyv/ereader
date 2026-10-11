@@ -133,6 +133,15 @@ loads only the first spine chapter asynchronously. This avoids the redundant
 whole-book and TOC scans while isolating ZIP/XML parsing from full-book memory
 usage.
 
+### ✅ 2026-10-11 — EPUB first-chapter path confirmed
+
+- The Asha 302 opened the first EPUB spine chapter and displayed three pages
+  of readable text using the diagnostic build.
+- The earlier gibberish was only from the plain-text-only reader probe.
+- The real MIDlet now lazily constructs the reader, settings, search, page,
+  and TOC screens instead of resolving all of them during `startApp()`. This
+  keeps EPUB and reader classes out of the initial library startup path.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.
