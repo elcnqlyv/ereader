@@ -128,7 +128,16 @@ Current status: smoke-test packaging is working and the app is launching into th
 **Status:** The smoke-test build path is fixed and validated. We can proceed to the Phase 1 source implementation work.
 ### 🟡 Phase 1 — Text reader (MVP on the phone)
 
-Full source code for these files was already provided in the conversation. Just paste them in:
+The initial Phase 1 source skeleton is now present. The current implementation has:
+- model objects and RMS-backed settings, library, and bookmark stores
+- sepia and Gruvbox themes
+- text pagination with arrow-key navigation
+- library, file-browser, settings, and reader canvases
+- keyboard navigation from the library to files (`1`) and settings (`2`), plus back (`0`)
+
+The file browser still uses placeholder entries because the current API jars do not include JSR-75 `FileConnection`; real SD-card enumeration requires adding a compatible JSR-75 API/runtime provider.
+
+Remaining Phase 1 files and behavior:
 
 - [ ] `src/com/ereader/util/Utf8.java` — UTF-8 encode/decode helpers
 - [ ] `src/com/ereader/model/Settings.java` — settings POJO
@@ -140,9 +149,9 @@ Full source code for these files was already provided in the conversation. Just 
 - [ ] `src/com/ereader/ui/Theme.java` — Sepia + Gruvbox Dark themes
 - [ ] `src/com/ereader/ui/ReaderCanvas.java` — paginated text reader
 - [ ] `src/com/ereader/ui/LibraryCanvas.java` — library list
-- [ ] `src/com/ereader/ui/FileBrowserCanvas.java` — SD-card file browser
+- [ ] `src/com/ereader/ui/FileBrowserCanvas.java` — real SD-card file browser (placeholder navigation exists)
 - [ ] `src/com/ereader/ui/SettingsCanvas.java` — settings screen (partial code exists)
-- [ ] `src/com/ereader/EReaderMidlet.java` — real MIDlet (replaces smoke test)
+- [x] `src/com/ereader/EReaderMidlet.java` — real MIDlet (initial implementation)
 
 **Phase 1 exit criteria:**
 - App installs and runs on the Asha 302

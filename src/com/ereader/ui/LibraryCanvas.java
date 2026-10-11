@@ -11,6 +11,8 @@ import javax.microedition.lcdui.Graphics;
 public class LibraryCanvas extends Canvas {
     public interface BookSelectionListener {
         void openBook(Book book);
+        void openBrowser();
+        void openSettings();
     }
 
     private Settings settings;
@@ -43,13 +45,17 @@ public class LibraryCanvas extends Canvas {
             selectedIndex = Math.max(0, selectedIndex - 1);
         } else if (action == DOWN) {
             selectedIndex = Math.min(books.size() - 1, selectedIndex + 1);
-        } else if (action == LEFT) {
+        } else if (action == FIRE || action == LEFT || action == RIGHT) {
             if (listener != null) {
                 listener.openBook((Book) books.elementAt(selectedIndex));
             }
-        } else if (action == RIGHT) {
+        } else if (keyCode == KEY_NUM1) {
             if (listener != null) {
-                listener.openBook((Book) books.elementAt(selectedIndex));
+                listener.openBrowser();
+            }
+        } else if (keyCode == KEY_NUM2) {
+            if (listener != null) {
+                listener.openSettings();
             }
         } else if (keyCode == KEY_STAR) {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
@@ -88,6 +94,7 @@ public class LibraryCanvas extends Canvas {
         }
 
         g.setColor(Theme.accent(settings.getTheme()));
-        g.drawString("* theme   # font", 4, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
+        g.drawString("1 files  2 settings  * theme  # font",
+                     4, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
     }
 }

@@ -8,6 +8,7 @@ import javax.microedition.lcdui.Graphics;
 public class FileBrowserCanvas extends Canvas {
     public interface PathSelectionListener {
         void openPath(String path);
+        void closeBrowser();
     }
 
     private Settings settings;
@@ -23,6 +24,11 @@ public class FileBrowserCanvas extends Canvas {
 
     public void setPathSelectionListener(PathSelectionListener listener) {
         this.listener = listener;
+    }
+
+    public void refresh() {
+        buildPaths();
+        repaint();
     }
 
     private void buildPaths() {
@@ -42,6 +48,10 @@ public class FileBrowserCanvas extends Canvas {
             selectedIndex = Math.max(0, selectedIndex - 1);
         } else if (action == DOWN) {
             selectedIndex = Math.min(paths.length - 1, selectedIndex + 1);
+        } else if (keyCode == KEY_NUM0) {
+            if (listener != null) {
+                listener.closeBrowser();
+            }
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
             if (listener != null) {
                 listener.openPath(paths[selectedIndex]);
@@ -71,5 +81,8 @@ public class FileBrowserCanvas extends Canvas {
             g.drawString(label, 4, y, Graphics.TOP | Graphics.LEFT);
             y += 16;
         }
+        g.setColor(Theme.accent(settings.getTheme()));
+        g.drawString("0 back  select file", 4, getHeight() - 12,
+                     Graphics.TOP | Graphics.LEFT);
     }
 }

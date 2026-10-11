@@ -8,6 +8,7 @@ import javax.microedition.lcdui.Graphics;
 public class SettingsCanvas extends Canvas {
     public interface SettingsChangeListener {
         void settingsChanged(Settings settings);
+        void closeSettings();
     }
 
     private Settings settings;
@@ -30,6 +31,10 @@ public class SettingsCanvas extends Canvas {
             selectedIndex = Math.max(0, selectedIndex - 1);
         } else if (action == DOWN) {
             selectedIndex = Math.min(4, selectedIndex + 1);
+        } else if (keyCode == KEY_NUM0) {
+            if (listener != null) {
+                listener.closeSettings();
+            }
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
             applySelection();
             if (listener != null) {
@@ -81,5 +86,8 @@ public class SettingsCanvas extends Canvas {
             g.drawString(items[i], 4, y, Graphics.TOP | Graphics.LEFT);
             y += 16;
         }
+        g.setColor(Theme.accent(settings.getTheme()));
+        g.drawString("0 back  select option", 4, getHeight() - 12,
+                     Graphics.TOP | Graphics.LEFT);
     }
 }

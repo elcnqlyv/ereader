@@ -59,6 +59,32 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         LibraryStore.addOrUpdate(book);
     }
 
+    public void openBrowser() {
+        if (display != null) {
+            browserCanvas.refresh();
+            display.setCurrent(browserCanvas);
+        }
+    }
+
+    public void openSettings() {
+        if (display != null) {
+            display.setCurrent(settingsCanvas);
+        }
+    }
+
+    public void closeBrowser() {
+        if (display != null) {
+            libraryCanvas.refresh();
+            display.setCurrent(libraryCanvas);
+        }
+    }
+
+    public void closeSettings() {
+        if (display != null) {
+            display.setCurrent(libraryCanvas);
+        }
+    }
+
     public void openPath(String path) {
         if (path == null || path.length() == 0) {
             return;
