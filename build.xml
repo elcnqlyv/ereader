@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="EReader" default="package" basedir=".">
+    <property environment="env" />
     <property name="jdk8"      value="/usr/lib/jvm/java-8-openjdk-32" />
-    <property name="proguard"  value="${env.PROGUARD_HOME}/lib/proguard.jar" />
+    <property name="proguard"  value="${user.home}/tools/proguard-6.2.2/lib/proguard.jar" />
+    <property name="microemu"  value="${user.home}/netbeans/microemulator-2.0.4/microemulator.jar" />
     <property name="lib.dir"   value="lib" />
     <property name="src.dir"   value="src" />
     <property name="res.dir"   value="res" />
@@ -51,16 +53,20 @@
         <jar destfile="${dist.dir}/${jar.name}"
              basedir="${prever}"
              manifest="MANIFEST.MF" />
-        <loadfile property="manifest.content" srcFile="MANIFEST.MF" />
         <length file="${dist.dir}/${jar.name}" property="jar.size" />
-        <echo file="${dist.dir}/${jad.name}">${manifest.content}
+        <echo file="${dist.dir}/${jad.name}">MIDlet-1: EReader, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
 MIDlet-Jar-URL: ${jar.name}
 MIDlet-Jar-Size: ${jar.size}
 </echo>
     </target>
 
     <target name="run" depends="package">
-        <java jar="${env.HOME}/netbeans/microemulator-2.0.4/microemulator.jar" fork="true" failonerror="true">
+        <java jar="${microemu}" fork="true" failonerror="true">
             <arg value="${dist.dir}/${jad.name}" />
         </java>
     </target>

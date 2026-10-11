@@ -1,43 +1,83 @@
-// SPDX-License-Identifier: CC-BY-NC-SA-4.0
 package com.ereader;
 
-import javax.microedition.midlet.*;
-import javax.microedition.lcdui.*;
+import com.ereader.model.Book;
+import com.ereader.model.Settings;
+import com.ereader.store.LibraryStore;
+import com.ereader.store.SettingsStore;
+import com.ereader.ui.FileBrowserCanvas;
+import com.ereader.ui.LibraryCanvas;
+import com.ereader.ui.ReaderCanvas;
+import com.ereader.ui.SettingsCanvas;
+import java.util.Vector;
+import javax.microedition.lcdui.Display;
+import javax.microedition.midlet.MIDlet;
 
-public class EReaderMidlet extends MIDlet {
+public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
+        FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener {
+
     private Display display;
-    private HelloCanvas canvas;
+    private Settings settings;
+    private LibraryCanvas libraryCanvas;
+    private FileBrowserCanvas browserCanvas;
+    private ReaderCanvas readerCanvas;
+    private SettingsCanvas settingsCanvas;
 
     public void startApp() {
-        display = Display.getDisplay(this);
-        if (canvas == null) canvas = new HelloCanvas();
-        display.setCurrent(canvas);
+        if (display == null) {
+            display = Display.getDisplay(this);
+            settings = SettingsStore.load();
+            libraryCanvas = new LibraryCanvas(settings);
+            libraryCanvas.setBookSelectionListener(this);
+            browserCanvas = new FileBrowserCanvas(settings);
+            browserCanvas.setPathSelectionListener(this);
+            readerCanvas = new ReaderCanvas(settings);
+            settingsCanvas = new SettingsCanvas(settings);
+            settingsCanvas.setSettingsChangeListener(this);
+        }
+        display.setCurrent(libraryCanvas);
     }
 
-    public void pauseApp() {}
-    public void destroyApp(boolean unconditional) {}
+    public void pauseApp() {
+    }
 
-    static class HelloCanvas extends Canvas {
-        HelloCanvas() { setFullScreenMode(true); }
+    public void destroyApp(boolean unconditional) {
+        SettingsStore.save(settings);
+    }
 
-        protected void paint(Graphics g) {
-            // Sepia theme colors
-            g.setColor(0xF4ECD8);
-            g.fillRect(0, 0, getWidth(), getHeight());
-
-            g.setColor(0x5B4636);
-            Font title = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_LARGE);
-            g.setFont(title);
-            g.drawString("EReader", getWidth() / 2, getHeight() / 2 - 20,
-                         Graphics.HCENTER | Graphics.BASELINE);
-
-            Font body = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-            g.setFont(body);
-            g.drawString("Smoke test OK", getWidth() / 2, getHeight() / 2 + 10,
-                         Graphics.HCENTER | Graphics.BASELINE);
-            g.drawString(getWidth() + "x" + getHeight(),
-                         getWidth() / 2, getHeight() / 2 + 30,
-                         Graphics.HCENTER | Graphics.BASELINE);
+    public void openBook(Book book) {
+        if (book == null) {
+            return;
         }
+        if (book.getPath() == null || book.getPath().length() == 0) {
+            return;
+        }
+        if (display == null) {
+            return;
+        }
+        display.setCurrent(readerCanvas);
+        readerCanvas.openBook(book);
+        LibraryStore.addOrUpdate(book);
+    }
+
+    public void openPath(String path) {
+        if (path == null || path.length() == 0) {
+            return;
+        }
+        if (display == null) {
+            return;
+        }
+        if (path.toLowerCase().indexOf(".txt") >= 0 || path.toLowerCase().indexOf(".md") >= 0) {
+            Book book = new Book(path, path);
+            display.setCurrent(readerCanvas);
+            readerCanvas.openBook(book);
+            LibraryStore.addOrUpdate(book);
+        } else {
+            display.setCurrent(libraryCanvas);
+        }
+    }
+
+    public void settingsChanged(Settings settings) {
+        this.settings = settings;
+        SettingsStore.save(this.settings);
     }
 }

@@ -5,8 +5,6 @@
 -libraryjars lib/midpapi20.jar
 -libraryjars lib/microemu-nokiaui.jar
 
--microedition
-
 -dontoptimize
 -dontshrink
 -dontobfuscate
