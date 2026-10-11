@@ -90,7 +90,7 @@ MIDlet-Jar-Size: ${jar.size}
                destdir="${build.dir}/diagnostic-classes"
                source="1.4" target="1.4"
                bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
-               classpath="${lib.dir}/microemu-jsr-75.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar:${lib.dir}/kxml2-2.3.0.jar:${lib.dir}/jzlib-cldc.jar"
                encoding="UTF-8"
                includeantruntime="false"
                fork="true"
@@ -367,7 +367,7 @@ MIDlet-Jar-Size: ${screens.jar.size}
                destdir="${build.dir}/browser-classes"
                source="1.4" target="1.4"
                bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
-               classpath="${lib.dir}/microemu-jsr-75.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar:${lib.dir}/kxml2-2.3.0.jar:${lib.dir}/jzlib-cldc.jar"
                encoding="UTF-8"
                includeantruntime="false"
                fork="true"
@@ -429,7 +429,7 @@ MIDlet-Jar-Size: ${browser.jar.size}
                destdir="${build.dir}/reader-classes"
                source="1.4" target="1.4"
                bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
-               classpath="${lib.dir}/microemu-jsr-75.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar:${lib.dir}/kxml2-2.3.0.jar:${lib.dir}/jzlib-cldc.jar"
                encoding="UTF-8"
                includeantruntime="false"
                fork="true"
@@ -444,8 +444,15 @@ MIDlet-Jar-Size: ${browser.jar.size}
             <include name="com/ereader/ui/FileBrowserCanvas.java" />
             <include name="com/ereader/ui/ReaderCanvas.java" />
             <include name="com/ereader/epub/TocEntry.java" />
+            <include name="com/ereader/epub/ZipReader.java" />
+            <include name="com/ereader/epub/EpubReader.java" />
+            <include name="com/ereader/epub/ContainerParser.java" />
+            <include name="com/ereader/epub/OpfParser.java" />
+            <include name="com/ereader/epub/XhtmlStripper.java" />
             <compilerarg value="-Xlint:-options" />
         </javac>
+        <unjar src="${lib.dir}/kxml2-2.3.0.jar" dest="${build.dir}/reader-classes" />
+        <unjar src="${lib.dir}/jzlib-cldc.jar" dest="${build.dir}/reader-classes" />
         <javac srcdir="diagnostic/reader-src"
                destdir="${build.dir}/reader-classes"
                source="1.4" target="1.4"

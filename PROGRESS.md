@@ -127,6 +127,10 @@ visible result; the probe now displays the selected path to test that handoff.
 - It excludes EPUB parsing, KXML, JZlib, search/page/TOC screens, and settings
   UI.
 
+The reader probe intentionally treated every selected file as plain text, so an
+EPUB appeared as ZIP gibberish. It now routes `.epub` files through the actual
+EPUB reader and displays a clear error if parsing fails.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.

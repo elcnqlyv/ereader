@@ -2,6 +2,8 @@ package com.ereader;
 
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
+import com.ereader.epub.EpubReader;
+import com.ereader.epub.TocEntry;
 import com.ereader.ui.FileBrowserCanvas;
 import com.ereader.ui.LibraryCanvas;
 import com.ereader.ui.ReaderCanvas;
@@ -55,7 +57,21 @@ public final class EReaderMidlet extends MIDlet
     public void openPath(String path) {
         Book book = new Book(path, path);
         display.setCurrent(reader);
-        reader.openBook(book);
+        if (path.toLowerCase().endsWith(".epub")) {
+            try {
+                reader.openText(book.getTitle(), path, EpubReader.readBook(path));
+                try {
+                    reader.setTableOfContents(EpubReader.readTableOfContents(path));
+                } catch (Exception ignored) {
+                    reader.setTableOfContents(new TocEntry[0]);
+                }
+            } catch (Exception ex) {
+                reader.openText(book.getTitle(), path,
+                        "Unable to open EPUB.\n\n" + ex.toString());
+            }
+        } else {
+            reader.openBook(book);
+        }
     }
 
     public void closeBrowser() {

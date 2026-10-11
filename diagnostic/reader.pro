@@ -11,6 +11,9 @@
 -dontobfuscate
 -target 1.1
 -microedition
+-dontwarn com.jcraft.jzlib.**
+-dontwarn org.xmlpull.**
+-dontwarn org.kxml2.**
 
 -keep public class * extends javax.microedition.midlet.MIDlet {
     public <init>();
