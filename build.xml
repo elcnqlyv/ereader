@@ -39,6 +39,8 @@
         <copy todir="${classes}">
             <fileset dir="${res.dir}" erroronmissingdir="false" />
         </copy>
+        <unjar src="${lib.dir}/kxml2-2.3.0.jar" dest="${classes}" />
+        <unjar src="${lib.dir}/jzlib-cldc.jar" dest="${classes}" />
     </target>
 
     <target name="preverify" depends="compile">
