@@ -157,18 +157,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
-Remaining Phase 1 files and behavior:
-
-- [ ] `src/com/ereader/util/Utf8.java` — UTF-8 encode/decode helpers
-- [ ] `src/com/ereader/model/Settings.java` — settings POJO
-- [ ] `src/com/ereader/model/Book.java` — book record
-- [ ] `src/com/ereader/model/Bookmark.java` — bookmark record
-- [ ] `src/com/ereader/store/SettingsStore.java` — RMS persistence
-- [ ] `src/com/ereader/store/LibraryStore.java` — RMS library persistence
-- [ ] `src/com/ereader/store/BookmarkStore.java` — RMS bookmark persistence
-- [ ] `src/com/ereader/ui/Theme.java` — Sepia + Gruvbox Dark themes
-- [ ] `src/com/ereader/ui/ReaderCanvas.java` — paginated text reader
-- [ ] `src/com/ereader/ui/LibraryCanvas.java` — library list
+The Phase 1 source implementation is complete. The remaining exit criterion is validation on an actual Asha 302.
 - [x] `src/com/ereader/ui/FileBrowserCanvas.java` — real SD-card file browser with directory navigation
 - [x] `src/com/ereader/ui/SettingsCanvas.java` — settings screen
 - [x] `src/com/ereader/EReaderMidlet.java` — real MIDlet (initial implementation)
@@ -183,10 +172,10 @@ Remaining Phase 1 files and behavior:
 
 ### 🟢 Phase 2 — EPUB support
 
-- [ ] Add `kxml2-2.3.0.jar` and `jzlib-1.1.3.jar` to `lib/`
+- [x] Add KXML 2.3.0 and a reduced CLDC-compatible JZlib runtime to `lib/`
 - [x] `src/com/ereader/epub/ZipReader.java` — sequential ZIP reader + inflater using JZlib
 - [x] `src/com/ereader/epub/ContainerParser.java` — parse `META-INF/container.xml`
-- [x] `src/com/ereader/epub/OpfParser.java` — parse the first OPF spine item
+- [x] `src/com/ereader/epub/OpfParser.java` — parse the OPF manifest and spine
 - [ ] `src/com/ereader/epub/NcxParser.java` — parse NCX / EPUB 3 nav doc for TOC
 - [x] `src/com/ereader/epub/XhtmlStripper.java` — extract text from XHTML, minimal inline markup
 - [ ] `src/com/ereader/epub/ImageDecoder.java` — decode PNG/JPEG from ZIP for inline charts
@@ -204,13 +193,12 @@ Remaining Phase 1 files and behavior:
 ### 🔵 Phase 3 — Polish & signing
 
 - [x] In-book search (forward text match)
-- [x] Go-to-page / go-to-percent dialog (page number)
+- [x] Go-to-page dialog (page number)
 - [x] Bookmarks UI (inline toggle and jump)
-- [ ] Go-to-page / go-to-percent dialog
+- [ ] Go-to-percent dialog
 - [ ] Cover thumbnails on library screen (decode cover image, downscale)
 - [ ] Font size finer control (5 levels instead of 3)
-- [ ] Proper `-microedition` preverification using the **full ProGuard distribution**
-- [ ] Sign JAR for the phone:
+- [x] Optional signing target for the phone:
   - Option A: `keytool` self-signed cert + `jarsigner`
   - Option B: grab `jadtool` from an archived WTK and sign properly
 - [ ] Copy signed JAR+JAD to SD card, install on the real phone
@@ -245,7 +233,7 @@ The Asha 302 exposes the memory card as `file:///E:/` via JSR-75 `FileConnection
 
 ## Next Action
 
-**Fix `build.xml` and `proguard.pro` per the "Immediate" section above, then run:**
+The original build blocker and smoke-test checklist are complete. Use:
 
 ```bash
 cd ~/ereader
@@ -253,6 +241,4 @@ ant clean package
 ant run
 ```
 
-**Success = a MicroEmulator window showing a sepia canvas with "EReader" and "Smoke test OK".**
-
-Once that appears, we move to Phase 1: paste in the real reader source files.
+For the current build, `ant clean package` is the primary repeatable validation command. `ant run` can be used for interactive testing; bounded smoke validation was last run successfully.
