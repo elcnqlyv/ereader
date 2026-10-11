@@ -81,7 +81,7 @@ public class FileBrowserCanvas extends Canvas {
 
     private boolean isSupportedBook(String name) {
         String lower = name.toLowerCase();
-        return lower.endsWith(".txt") || lower.endsWith(".md");
+        return lower.endsWith(".txt") || lower.endsWith(".md") || lower.endsWith(".epub");
     }
 
     protected void keyPressed(int keyCode) {

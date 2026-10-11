@@ -74,6 +74,15 @@ public class ReaderCanvas extends Canvas {
         repaint();
     }
 
+    public void openText(String bookTitle, String path, String text) {
+        title = bookTitle;
+        currentPath = path;
+        pageIndex = 0;
+        sourceText = text == null || text.length() == 0 ? "Empty file." : text;
+        lines = paginate(sourceText);
+        repaint();
+    }
+
     public void nextPage() {
         if (pageIndex < getPageCount() - 1) {
             pageIndex++;

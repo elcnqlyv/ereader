@@ -2,6 +2,7 @@ package com.ereader;
 
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
+import com.ereader.epub.EpubReader;
 import com.ereader.store.LibraryStore;
 import com.ereader.store.SettingsStore;
 import com.ereader.ui.FileBrowserCanvas;
@@ -96,12 +97,24 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         if (display == null) {
             return;
         }
-        if (path.toLowerCase().indexOf(".txt") >= 0 || path.toLowerCase().indexOf(".md") >= 0) {
+        String lower = path.toLowerCase();
+        if (lower.indexOf(".txt") >= 0 || lower.indexOf(".md") >= 0) {
             Book book = new Book(displayName(path), path);
             display.setCurrent(readerCanvas);
             currentBook = book;
             readerCanvas.openBook(book);
             LibraryStore.addOrUpdate(book);
+        } else if (lower.indexOf(".epub") >= 0) {
+            try {
+                String text = EpubReader.readFirstChapter(path);
+                Book book = new Book(displayName(path), path);
+                display.setCurrent(readerCanvas);
+                currentBook = book;
+                readerCanvas.openText(book.getTitle(), path, text);
+                LibraryStore.addOrUpdate(book);
+            } catch (Exception ex) {
+                display.setCurrent(libraryCanvas);
+            }
         } else {
             display.setCurrent(libraryCanvas);
         }

@@ -144,6 +144,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - file browser filters to supported text books and library entries use readable filenames
 - settings screen shows the active theme and font choice
 - EPUB foundation dependencies and streaming ZIP/XML helpers are now present
+- first EPUB spine chapter can be extracted, XHTML-stripped, and opened in the reader
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
@@ -176,13 +177,13 @@ Remaining Phase 1 files and behavior:
 - [ ] Add `kxml2-2.3.0.jar` and `jzlib-1.1.3.jar` to `lib/`
 - [ ] `src/com/ereader/epub/ZipReader.java` — ZIP central directory reader + inflater using JZlib
 - [ ] `src/com/ereader/epub/ContainerParser.java` — parse `META-INF/container.xml`
-- [ ] `src/com/ereader/epub/OpfParser.java` — parse OPF: metadata, spine, manifest
+- [x] `src/com/ereader/epub/OpfParser.java` — parse the first OPF spine item
 - [ ] `src/com/ereader/epub/NcxParser.java` — parse NCX / EPUB 3 nav doc for TOC
-- [ ] `src/com/ereader/epub/XhtmlStripper.java` — extract text from XHTML, minimal inline markup
+- [x] `src/com/ereader/epub/XhtmlStripper.java` — extract text from XHTML, minimal inline markup
 - [ ] `src/com/ereader/epub/ImageDecoder.java` — decode PNG/JPEG from ZIP for inline charts
 - [ ] `src/com/ereader/epub/CssSubset.java` — parse a subset of CSS (italic, bold, colors, alignment)
-- [ ] `src/com/ereader/epub/EpubReader.java` — facade tying it together
-- [ ] Wire `FileBrowserCanvas` to route `.epub` files to `EpubReader`
+- [x] `src/com/ereader/epub/EpubReader.java` — facade tying it together
+- [x] Wire `FileBrowserCanvas` to route `.epub` files to `EpubReader`
 - [ ] Chapter navigation UI
 - [ ] TOC UI
 
