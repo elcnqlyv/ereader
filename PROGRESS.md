@@ -152,7 +152,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - EPUB runtime dependencies use KXML 2.3.0 and a reduced CLDC-compatible JZlib runtime
 - Ant now merges those runtime classes into the MIDlet before ProGuard packaging
 - README now documents build commands, controls, and supported book formats
-- optional `ant sign` target added without storing signing credentials
+- optional `ant sign` target added without storing signing credentials; it refreshes JAD size after signing
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 

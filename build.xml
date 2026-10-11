@@ -92,6 +92,10 @@ MIDlet-Jar-Size: ${jar.size}
             <arg value="${dist.dir}/${jar.name}" />
             <arg value="${sign.alias}" />
         </exec>
-        <echo message="Signed ${dist.dir}/${jar.name}; update the JAD size if the signer changed the archive." />
+        <length file="${dist.dir}/${jar.name}" property="sign.jar.size" />
+        <replaceregexp file="${dist.dir}/${jad.name}"
+                       match="MIDlet-Jar-Size: .*"
+                       replace="MIDlet-Jar-Size: ${sign.jar.size}"
+                       byline="true" />
     </target>
 </project>
