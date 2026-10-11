@@ -182,8 +182,8 @@ Remaining Phase 1 files and behavior:
 ### 🟢 Phase 2 — EPUB support
 
 - [ ] Add `kxml2-2.3.0.jar` and `jzlib-1.1.3.jar` to `lib/`
-- [ ] `src/com/ereader/epub/ZipReader.java` — ZIP central directory reader + inflater using JZlib
-- [ ] `src/com/ereader/epub/ContainerParser.java` — parse `META-INF/container.xml`
+- [x] `src/com/ereader/epub/ZipReader.java` — sequential ZIP reader + inflater using JZlib
+- [x] `src/com/ereader/epub/ContainerParser.java` — parse `META-INF/container.xml`
 - [x] `src/com/ereader/epub/OpfParser.java` — parse the first OPF spine item
 - [ ] `src/com/ereader/epub/NcxParser.java` — parse NCX / EPUB 3 nav doc for TOC
 - [x] `src/com/ereader/epub/XhtmlStripper.java` — extract text from XHTML, minimal inline markup
