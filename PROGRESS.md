@@ -109,6 +109,13 @@ export PATH=$JAVA_HOME/bin:$PATH
   rendering with the exact EReader MIDlet class name.
 - It excludes JSR-75, the reader, EPUB parsing, KXML, and JZlib.
 
+### 🔬 2026-10-11 — Added a JSR-75 file browser probe
+
+- Added `ant browser`, producing `dist/ereader-browser-probe.jar`.
+- This wires key `1` to the real `FileBrowserCanvas` and tests directory
+  enumeration from the default `file:///E:/` root.
+- It excludes the reader, EPUB parsing, KXML, and JZlib.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.

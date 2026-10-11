@@ -90,6 +90,7 @@ MIDlet-Jar-Size: ${jar.size}
                destdir="${build.dir}/diagnostic-classes"
                source="1.4" target="1.4"
                bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar"
                encoding="UTF-8"
                includeantruntime="false"
                fork="true"
@@ -350,6 +351,68 @@ MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Jar-URL: ereader-screens-probe.jar
 MIDlet-Jar-Size: ${screens.jar.size}
+</echo>
+    </target>
+
+    <target name="browser-clean">
+        <delete dir="${build.dir}/browser-classes" />
+        <delete dir="${build.dir}/browser-preverified" />
+        <delete file="${dist.dir}/ereader-browser-probe.jar" />
+        <delete file="${dist.dir}/ereader-browser-probe.jad" />
+    </target>
+
+    <target name="browser-compile" depends="browser-clean">
+        <mkdir dir="${build.dir}/browser-classes" />
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/browser-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="com/ereader/model/Book.java" />
+            <include name="com/ereader/model/Settings.java" />
+            <include name="com/ereader/ui/Theme.java" />
+            <include name="com/ereader/ui/LibraryCanvas.java" />
+            <include name="com/ereader/ui/FileBrowserCanvas.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <javac srcdir="diagnostic/browser-src"
+               destdir="${build.dir}/browser-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${build.dir}/browser-classes:${lib.dir}/microemu-jsr-75.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="browser-preverify" depends="browser-compile">
+        <mkdir dir="${build.dir}/browser-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/browser.pro" />
+        </java>
+    </target>
+
+    <target name="browser" depends="browser-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-browser-probe.jar"
+             basedir="${build.dir}/browser-preverified"
+             manifest="diagnostic/BROWSER-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-browser-probe.jar" property="browser.jar.size" />
+        <echo file="${dist.dir}/ereader-browser-probe.jad">MIDlet-1: EReader browser probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader browser probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-browser-probe.jar
+MIDlet-Jar-Size: ${browser.jar.size}
 </echo>
     </target>
 
