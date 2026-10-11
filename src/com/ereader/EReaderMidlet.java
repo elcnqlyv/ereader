@@ -9,6 +9,7 @@ import com.ereader.ui.FileBrowserCanvas;
 import com.ereader.ui.LibraryCanvas;
 import com.ereader.ui.ReaderCanvas;
 import com.ereader.ui.SearchCanvas;
+import com.ereader.ui.PageCanvas;
 import com.ereader.ui.SettingsCanvas;
 import java.util.Vector;
 import javax.microedition.lcdui.Display;
@@ -16,7 +17,7 @@ import javax.microedition.midlet.MIDlet;
 
 public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
         FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener,
-        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener {
+        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener, PageCanvas.PageListener {
 
     private Display display;
     private Settings settings;
@@ -25,6 +26,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     private ReaderCanvas readerCanvas;
     private SettingsCanvas settingsCanvas;
     private SearchCanvas searchCanvas;
+    private PageCanvas pageCanvas;
     private Book currentBook;
 
     public void startApp() {
@@ -41,6 +43,8 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             settingsCanvas.setSettingsChangeListener(this);
             searchCanvas = new SearchCanvas();
             searchCanvas.setSearchListener(this);
+            pageCanvas = new PageCanvas();
+            pageCanvas.setPageListener(this);
         }
         display.setCurrent(libraryCanvas);
     }
@@ -169,6 +173,25 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     }
 
     public void cancelSearch() {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
+        }
+    }
+
+    public void openPagePrompt() {
+        if (display != null) {
+            display.setCurrent(pageCanvas);
+        }
+    }
+
+    public void goToPage(String value) {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
+            readerCanvas.goToPage(value);
+        }
+    }
+
+    public void cancelPage() {
         if (display != null) {
             display.setCurrent(readerCanvas);
         }

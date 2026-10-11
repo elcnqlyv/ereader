@@ -18,6 +18,7 @@ public class ReaderCanvas extends Canvas {
         void positionChanged(int page);
         void closeReader();
         void openSearch();
+        void openPagePrompt();
     }
 
     private Settings settings;
@@ -124,6 +125,10 @@ public class ReaderCanvas extends Canvas {
         } else if (keyCode == KEY_NUM9) {
             if (listener != null) {
                 listener.openSearch();
+            }
+        } else if (keyCode == KEY_NUM6) {
+            if (listener != null) {
+                listener.openPagePrompt();
             }
         } else if (keyCode == KEY_STAR) {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
@@ -300,5 +305,17 @@ public class ReaderCanvas extends Canvas {
             }
         }
         return false;
+    }
+
+    public void goToPage(String value) {
+        try {
+            int requested = Integer.parseInt(value) - 1;
+            if (requested >= 0 && requested < getPageCount()) {
+                pageIndex = requested;
+                notifyPositionChanged();
+                repaint();
+            }
+        } catch (Exception ignored) {
+        }
     }
 }
