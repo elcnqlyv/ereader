@@ -38,7 +38,7 @@ Instead we use a **lean, CLI-driven toolchain**:
 |---|---|---|---|
 | 32-bit JDK 8 (Zulu) | `/usr/lib/jvm/java-8-openjdk-32` | 1.8.0_504 | Compile + run tools |
 | Apache Ant | system package | 1.10.17 | Build automation |
-| ProGuard | `~/tools/proguard-6.2.2/lib/proguard.jar` | 6.2.2 | Preverification / obfuscation |
+| ProGuard | `~/tools/proguard6.2.2/lib/proguard.jar` | 6.2.2 | J2ME preverification / obfuscation |
 | MicroEmulator | `~/netbeans/microemulator-2.0.4/` | 2.0.4 | Test emulator |
 | J2ME API jars | `~/ereader/lib/` | CLDC 1.1 / MIDP 2.0 | Compile-time classpath |
 | VS Code | system package | latest | Editor |
@@ -46,7 +46,7 @@ Instead we use a **lean, CLI-driven toolchain**:
 **Environment variables** (add to `~/.bashrc`):
 ```bash
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-32
-export PROGUARD_HOME=$HOME/tools/proguard-6.2.2
+export PROGUARD_HOME=$HOME/tools/proguard6.2.2
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
@@ -98,14 +98,15 @@ ereader/
 
 - `MANIFEST.MF` — MIDlet descriptor
 - `build.xml` — Ant script (clean / compile / preverify / package / run)
-- `proguard.pro` — ProGuard rules (currently with `-microedition` removed)
+- `proguard.pro` — ProGuard rules with J2ME `-microedition` preverification
 - `src/com/ereader/EReaderMidlet.java` — smoke test MIDlet (draws sepia canvas, "Smoke test OK")
 
 ### ✅ 4. Smoke test — **BUILD FIXED / LAUNCHED**
 
 We fixed the original failure by replacing the `env.PROGUARD_HOME` path with a direct `${user.home}` path, adding `<property environment="env" />` for compatibility, and correcting the MicroEmulator launch jar path.
 
-We also removed `-microedition` from `proguard.pro` because the Maven-Central ProGuard jar does not include the J2ME preverifier.
+The release build uses the full ProGuard distribution because the Maven-Central
+ProGuard jar does not include the J2ME preverifier.
 
 Validated steps:
 - `ant clean package` — succeeded, generated `dist/EReader.jar` and `dist/EReader.jad`
@@ -119,9 +120,9 @@ Current status: smoke-test packaging is working and the app is launching into th
 
 ### 🔴 Immediate (Phase 1 smoke test — finish this first)
 
-- [x] Fix `build.xml`: add `<property environment="env" />` and switch ProGuard path to `${user.home}/tools/proguard-6.2.2/lib/proguard.jar`
+- [x] Fix `build.xml`: add `<property environment="env" />` and use the full ProGuard path `${user.home}/tools/proguard6.2.2/lib/proguard.jar`
 - [x] Fix `build.xml` `run` target: use `${user.home}/netbeans/microemulator-2.0.4/microemulator.jar`
-- [x] Remove `-microedition` from `proguard.pro`
+- [x] Use the full ProGuard distribution with `-microedition` preverification
 - [x] Run `ant clean package` → produced `dist/EReader.jar` and `dist/EReader.jad`
 - [x] Run `ant run` → MicroEmulator launched with the generated JAD (backgrounded by the UI)
 
@@ -156,6 +157,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - optional `ant sign` target added without storing signing credentials; it refreshes JAD size after signing
 - bounded MicroEmulator smoke check completed successfully after packaging; the launcher was terminated by the test timeout to avoid leaving a persistent GUI process
 - `v0.1.0` test release published with unsigned `EReader.jar` and `EReader.jad` assets for real-device validation
+- `v0.1.1` preverified test release prepared after the first device reported `java/lang/VerifyError`
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
@@ -217,7 +219,7 @@ Ant does not read `os.environ` by default. `<property environment="env" />` must
 Requires the **full ProGuard distribution** (not the `proguard-base` jar from Maven Central). The full distribution includes the J2ME preverifier. When we're ready for real-phone packaging, download:
 
 ```
-https://github.com/Guardsquare/proguard/releases/download/v6.2.2/proguard-6.2.2.zip
+https://sourceforge.net/projects/proguard/files/proguard/6.2/proguard6.2.2.zip/download
 ```
 
 If preverification cannot be obtained, MIDP devices will often still run non-preverified JARs, but with warnings. Worth testing.

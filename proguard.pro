@@ -9,6 +9,7 @@
 -dontoptimize
 -dontshrink
 -dontobfuscate
+-microedition
 -dontwarn com.jcraft.jzlib.**
 
 -keep public class * extends javax.microedition.midlet.MIDlet {

@@ -2,7 +2,7 @@
 <project name="EReader" default="package" basedir=".">
     <property environment="env" />
     <property name="jdk8"      value="/usr/lib/jvm/java-8-openjdk-32" />
-    <property name="proguard"  value="${user.home}/tools/proguard-6.2.2/lib/proguard.jar" />
+    <property name="proguard"  value="${user.home}/tools/proguard6.2.2/lib/proguard.jar" />
     <property name="microemu"  value="${user.home}/netbeans/microemulator-2.0.4/microemulator.jar" />
     <property name="lib.dir"   value="lib" />
     <property name="src.dir"   value="src" />
