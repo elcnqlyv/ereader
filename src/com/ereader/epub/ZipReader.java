@@ -152,36 +152,50 @@ public final class ZipReader {
                 (int) Math.min(expectedSize, 32768));
         byte[] compressed = new byte[512];
         byte[] decompressed = new byte[512];
-        int count;
+        int count = -1;
+        boolean inputEnded = false;
         try {
-            while ((count = input.read(compressed)) != -1) {
-                inflater.setInput(compressed, 0, count, false);
-                boolean checkedWithoutInput = false;
-                while (inflater.getAvailIn() > 0 || !checkedWithoutInput) {
-                    checkedWithoutInput = inflater.getAvailIn() == 0;
-                    inflater.setOutput(decompressed, 0, decompressed.length);
-                    int result = inflater.inflate(com.jcraft.jzlib.JZlib.Z_NO_FLUSH);
-                    int produced = decompressed.length - inflater.getAvailOut();
-                    if (produced > 0) {
-                        output.write(decompressed, 0, produced);
+            while (!inflater.finished()) {
+                if (inflater.getAvailIn() == 0) {
+                    if (inputEnded) {
+                        throw new IOException("Truncated deflated EPUB entry");
                     }
-                    if (result == com.jcraft.jzlib.JZlib.Z_STREAM_END) {
-                        int remaining = inflater.getAvailIn();
-                        if (remaining > 0 && cursor != null) {
-                            cursor.unread(compressed, count - remaining, remaining);
-                        }
-                        return output.toByteArray();
-                    }
-                    if (result != com.jcraft.jzlib.JZlib.Z_OK
-                            && result != com.jcraft.jzlib.JZlib.Z_BUF_ERROR) {
-                        throw new IOException("Invalid deflated EPUB entry");
-                    }
-                    if (inflater.getAvailIn() == 0 && result == com.jcraft.jzlib.JZlib.Z_BUF_ERROR) {
-                        break;
+                    count = input.read(compressed);
+                    if (count < 0) {
+                        inputEnded = true;
+                        count = 0;
+                        inflater.setInput(compressed, 0, 0, false);
+                    } else {
+                        inflater.setInput(compressed, 0, count, false);
                     }
                 }
+                inflater.setOutput(decompressed, 0, decompressed.length);
+                int result = inflater.inflate(com.jcraft.jzlib.JZlib.Z_NO_FLUSH);
+                int produced = decompressed.length - inflater.getAvailOut();
+                if (produced > 0) {
+                    output.write(decompressed, 0, produced);
+                }
+                if (result != com.jcraft.jzlib.JZlib.Z_OK
+                        && result != com.jcraft.jzlib.JZlib.Z_STREAM_END
+                        && result != com.jcraft.jzlib.JZlib.Z_BUF_ERROR) {
+                    throw new IOException("Invalid deflated EPUB entry");
+                }
+                if (result == com.jcraft.jzlib.JZlib.Z_BUF_ERROR
+                        && inflater.getAvailIn() == 0) {
+                    continue;
+                }
+                if (result == com.jcraft.jzlib.JZlib.Z_BUF_ERROR
+                        && produced == 0) {
+                    throw new IOException("Invalid deflated EPUB entry");
+                }
             }
-            throw new IOException("Truncated deflated EPUB entry");
+            if (cursor != null) {
+                int remaining = inflater.getAvailIn();
+                if (remaining > 0) {
+                    cursor.unread(compressed, count - remaining, remaining);
+                }
+            }
+            return output.toByteArray();
         } finally {
             inflater.end();
         }

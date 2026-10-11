@@ -172,6 +172,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - prepared v0.1.10 as a direct standalone JAR release; the convenience ZIP is no longer included
 - changed EPUB passes to use a fresh JSR-75 file connection each time, avoiding the Asha 302 "InputStream is already open" limitation
 - replaced the packaged icon with the supplied All Aboard artwork and removed all in-app upper-right logo drawing
+- replaced the JZlib input loop with a finished-state loop and final empty-input flush, matching the working J2ME inflater pattern used by MPGram-derived code
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
