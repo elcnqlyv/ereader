@@ -2,7 +2,6 @@ package com.ereader.epub;
 
 import com.ereader.util.Utf8;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -27,22 +26,21 @@ public final class ZipReader {
 
     public static byte[] readEntry(InputConnection connection, String wantedName)
             throws IOException {
-        InputStream input = connection.openInputStream();
+        Cursor input = new Cursor(connection.openInputStream());
         try {
-            DataInputStream data = new DataInputStream(input);
             while (true) {
-                EntryHeader header = readHeader(data);
+                EntryHeader header = readHeader(input);
                 if (header == null) {
                     return null;
                 }
                 if (wantedName.equals(header.name)) {
-                    byte[] value = readValue(data, header);
+                    byte[] value = readValue(input, header);
                     if (header.hasDescriptor()) {
-                        skipDataDescriptor(data);
+                        skipDataDescriptor(input);
                     }
                     return value;
                 }
-                skipEntry(data, header);
+                skipEntry(input, header);
             }
         } finally {
             input.close();
@@ -56,21 +54,20 @@ public final class ZipReader {
         for (int i = 0; i < wantedNames.length; i++) {
             wanted.put(wantedNames[i], wantedNames[i]);
         }
-        InputStream input = connection.openInputStream();
+        Cursor input = new Cursor(connection.openInputStream());
         try {
-            DataInputStream data = new DataInputStream(input);
             while (result.size() < wanted.size()) {
-                EntryHeader header = readHeader(data);
+                EntryHeader header = readHeader(input);
                 if (header == null) {
                     break;
                 }
                 if (wanted.get(header.name) != null) {
-                    result.put(header.name, readValue(data, header));
+                    result.put(header.name, readValue(input, header));
                     if (header.hasDescriptor()) {
-                        skipDataDescriptor(data);
+                        skipDataDescriptor(input);
                     }
                 } else {
-                    skipEntry(data, header);
+                    skipEntry(input, header);
                 }
             }
             return result;
@@ -79,7 +76,7 @@ public final class ZipReader {
         }
     }
 
-    private static EntryHeader readHeader(DataInputStream data) throws IOException {
+    private static EntryHeader readHeader(InputStream data) throws IOException {
         int signature;
         try {
             signature = readLittleEndianInt(data);
@@ -89,8 +86,8 @@ public final class ZipReader {
         if (signature != LOCAL_SIGNATURE) {
             return null;
         }
-        data.readUnsignedByte();
-        data.readUnsignedByte();
+        readByte(data);
+        readByte(data);
         int flags = readLittleEndianShort(data);
         int method = readLittleEndianShort(data);
         skipFully(data, 8);
@@ -99,30 +96,30 @@ public final class ZipReader {
         int nameLength = readLittleEndianShort(data);
         int extraLength = readLittleEndianShort(data);
         byte[] nameBytes = new byte[nameLength];
-        data.readFully(nameBytes);
+        readFully(data, nameBytes);
         skipFully(data, extraLength);
         return new EntryHeader(Utf8.decode(nameBytes), flags, method,
                 compressedSize, uncompressedSize);
     }
 
-    private static byte[] readValue(InputStream input, EntryHeader header) throws IOException {
+    private static byte[] readValue(Cursor input, EntryHeader header) throws IOException {
         if (header.hasDescriptor()) {
             if (header.method != 8) {
                 throw new IOException("ZIP stored entries with data descriptors are unsupported");
             }
-            return inflateDeflated(input, header.uncompressedSize);
+            return inflateDeflated(input, header.uncompressedSize, input);
         }
         return inflate(new LimitedInputStream(input, header.compressedSize),
                 header.method, header.uncompressedSize);
     }
 
-    private static void skipEntry(InputStream input, EntryHeader header) throws IOException {
+    private static void skipEntry(Cursor input, EntryHeader header) throws IOException {
         if (header.hasDescriptor()) {
             if (header.method != 8) {
                 throw new IOException("ZIP stored entries with data descriptors are unsupported");
             }
-            inflateDeflated(input, header.uncompressedSize);
-            skipDataDescriptor((DataInputStream) input);
+            inflateDeflated(input, header.uncompressedSize, input);
+            skipDataDescriptor(input);
         } else {
             skipFully(input, header.compressedSize);
         }
@@ -131,7 +128,7 @@ public final class ZipReader {
     private static byte[] inflate(InputStream input, int method, long expectedSize)
             throws IOException {
         if (method == 8) {
-            return inflateDeflated(input, expectedSize);
+            return inflateDeflated(input, expectedSize, null);
         }
         if (method != 0) {
             throw new IOException("Unsupported ZIP compression method: " + method);
@@ -146,7 +143,8 @@ public final class ZipReader {
         return output.toByteArray();
     }
 
-    private static byte[] inflateDeflated(InputStream input, long expectedSize)
+    private static byte[] inflateDeflated(InputStream input, long expectedSize,
+            Cursor cursor)
             throws IOException {
         com.jcraft.jzlib.Inflater inflater = new com.jcraft.jzlib.Inflater(
                 com.jcraft.jzlib.JZlib.MAX_WBITS, true);
@@ -166,6 +164,10 @@ public final class ZipReader {
                         output.write(decompressed, 0, produced);
                     }
                     if (result == com.jcraft.jzlib.JZlib.Z_STREAM_END) {
+                        int remaining = inflater.getAvailIn();
+                        if (remaining > 0 && cursor != null) {
+                            cursor.unread(compressed, count - remaining, remaining);
+                        }
                         return output.toByteArray();
                     }
                     if (result != com.jcraft.jzlib.JZlib.Z_OK
@@ -180,17 +182,36 @@ public final class ZipReader {
         }
     }
 
-    private static void skipDataDescriptor(DataInputStream input) throws IOException {
+    private static void skipDataDescriptor(InputStream input) throws IOException {
         int first = readLittleEndianInt(input);
         skipFully(input, first == DESCRIPTOR_SIGNATURE ? 12 : 8);
     }
 
-    private static int readLittleEndianShort(DataInputStream input) throws IOException {
-        return input.readUnsignedByte() | (input.readUnsignedByte() << 8);
+    private static int readLittleEndianShort(InputStream input) throws IOException {
+        return readByte(input) | (readByte(input) << 8);
     }
 
-    private static int readLittleEndianInt(DataInputStream input) throws IOException {
+    private static int readLittleEndianInt(InputStream input) throws IOException {
         return readLittleEndianShort(input) | (readLittleEndianShort(input) << 16);
+    }
+
+    private static int readByte(InputStream input) throws IOException {
+        int value = input.read();
+        if (value < 0) {
+            throw new java.io.EOFException();
+        }
+        return value;
+    }
+
+    private static void readFully(InputStream input, byte[] buffer) throws IOException {
+        int offset = 0;
+        while (offset < buffer.length) {
+            int count = input.read(buffer, offset, buffer.length - offset);
+            if (count < 0) {
+                throw new java.io.EOFException();
+            }
+            offset += count;
+        }
     }
 
     private static void skipFully(InputStream input, long count) throws IOException {
@@ -227,6 +248,60 @@ public final class ZipReader {
         }
     }
 
+    private static final class Cursor extends InputStream {
+        private final InputStream input;
+        private byte[] pending;
+        private int pendingOffset;
+        private int pendingLength;
+
+        Cursor(InputStream input) {
+            this.input = input;
+        }
+
+        public int read() throws IOException {
+            if (pendingLength > 0) {
+                int value = pending[pendingOffset] & 0xff;
+                pendingOffset++;
+                pendingLength--;
+                return value;
+            }
+            return input.read();
+        }
+
+        public int read(byte[] buffer, int offset, int length) throws IOException {
+            if (length == 0) {
+                return 0;
+            }
+            if (pendingLength > 0) {
+                int count = Math.min(length, pendingLength);
+                System.arraycopy(pending, pendingOffset, buffer, offset, count);
+                pendingOffset += count;
+                pendingLength -= count;
+                return count;
+            }
+            return input.read(buffer, offset, length);
+        }
+
+        void unread(byte[] buffer, int offset, int length) {
+            if (length == 0) {
+                return;
+            }
+            if (pendingLength == 0) {
+                pending = new byte[length];
+                System.arraycopy(buffer, offset, pending, 0, length);
+                pendingOffset = 0;
+                pendingLength = length;
+                return;
+            }
+            byte[] combined = new byte[length + pendingLength];
+            System.arraycopy(buffer, offset, combined, 0, length);
+            System.arraycopy(pending, pendingOffset, combined, length, pendingLength);
+            pending = combined;
+            pendingOffset = 0;
+            pendingLength = combined.length;
+        }
+    }
+
     private static final class LimitedInputStream extends InputStream {
         private final InputStream input;
         private long remaining;
@@ -257,12 +332,6 @@ public final class ZipReader {
                 remaining -= count;
             }
             return count;
-        }
-
-        public long skip(long count) throws IOException {
-            long skipped = input.skip(Math.min(count, remaining));
-            remaining -= skipped;
-            return skipped;
         }
     }
 }

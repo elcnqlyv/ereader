@@ -168,6 +168,8 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - changed the packaged logo to an indexed-color PNG, declared it as `MIDlet-Icon`, and prepared a JAR-first installation path for phones that cannot open JAD files
 - removed the unstable v0.1.6 ZIP batch implementation and replaced it with a clean two-pass sequential reader that limits EPUB rescans while preserving device-safe JAR packaging
 - removed the logo's white background with transparency while retaining an indexed, low-resolution PNG
+- fixed the remaining EPUB truncation bug by preserving compressed bytes that the inflater reads ahead of ZIP data descriptors
+- prepared v0.1.10 as a direct standalone JAR release; the convenience ZIP is no longer included
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
