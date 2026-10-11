@@ -167,6 +167,67 @@ MIDlet-Jar-Size: ${minimal.jar.size}
 </echo>
     </target>
 
+    <target name="settings-clean">
+        <delete dir="${build.dir}/settings-classes" />
+        <delete dir="${build.dir}/settings-preverified" />
+        <delete file="${dist.dir}/ereader-settings-probe.jar" />
+        <delete file="${dist.dir}/ereader-settings-probe.jad" />
+    </target>
+
+    <target name="settings-compile" depends="settings-clean">
+        <mkdir dir="${build.dir}/settings-classes" />
+        <javac srcdir="diagnostic/settings-src"
+               destdir="${build.dir}/settings-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${src.dir}"
+               sourcepath="${src.dir}"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="**/*.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/settings-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="com/ereader/model/Settings.java" />
+            <include name="com/ereader/util/Utf8.java" />
+            <include name="com/ereader/store/SettingsStore.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="settings-preverify" depends="settings-compile">
+        <mkdir dir="${build.dir}/settings-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/settings.pro" />
+        </java>
+    </target>
+
+    <target name="settings" depends="settings-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-settings-probe.jar"
+             basedir="${build.dir}/settings-preverified"
+             manifest="diagnostic/SETTINGS-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-settings-probe.jar" property="settings.jar.size" />
+        <echo file="${dist.dir}/ereader-settings-probe.jad">MIDlet-1: EReader settings probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader settings probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-settings-probe.jar
+MIDlet-Jar-Size: ${settings.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />

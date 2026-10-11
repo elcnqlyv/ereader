@@ -95,6 +95,13 @@ export PATH=$JAVA_HOME/bin:$PATH
   here would point to a class-name/install conflict; a successful launch means
   the original EReader startup dependency graph is the failing layer.
 
+### 🔬 2026-10-11 — Added an RMS settings probe
+
+- Added `ant settings`, producing `dist/ereader-settings-probe.jar`.
+- This uses the EReader class name and tests only `SettingsStore.load()`, the
+  `Settings` model, and a blank Canvas.
+- It excludes the library, file browser, reader, EPUB parser, KXML, and JZlib.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed
