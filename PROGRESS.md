@@ -154,6 +154,21 @@ usage.
 - Clean package and MicroEmulator startup passed with class-file major
   version 45.
 
+### ✅ 2026-10-11 — First working full release on the Asha 302
+
+- The listener-isolated release was installed after removing the previous
+  EReader files from the same phone folder.
+- The full application now launches to Library and opens EPUB books on the
+  Nokia Asha 302 (RM-813, software 15.09).
+- The successful test indicates stale files or installation state in the
+  folder contributed to the earlier black/white restart behavior.
+- Removed the temporary diagnostic probe sources and their Ant targets from
+  the repository now that the component isolation work is complete.
+- Replaced `res/logo.png` with the latest supplied PNG. It remains an optional
+  packaged resource and is intentionally not declared as `MIDlet-Icon`.
+- Updated the README installation instructions to use the directly tested
+  JAR workflow and added the supplied logo preview.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.

@@ -3,6 +3,8 @@
 
 ## Build
 
+![EReader logo](res/logo.png)
+
 The project uses Apache Ant and a 32-bit JDK 8:
 
 ```bash
@@ -16,10 +18,11 @@ The generated MIDlet files are written to `dist/EReader.jar` and
 ant run
 ```
 
-For phone installation, transfer **both** files to the same folder and open
-`EReader.jad`; do not launch the JAR directly. The release build uses the full
-ProGuard distribution with J2ME preverification and a legacy Java 1.1 class
-format required by older Nokia JVMs.
+For phone installation, transfer `EReader.jar` to the phone and open the JAR
+directly. The JAD is optional metadata for phones that require
+descriptor-based installation. The release build uses the full ProGuard
+distribution with J2ME preverification and a legacy Java 1.1 class format
+required by older Nokia JVMs.
 
 Signing is intentionally opt-in and takes credentials on the command line;
 no keystore or password is stored in the repository:
@@ -52,7 +55,7 @@ that require descriptor-based installation. The logo remains packaged as a
 resource, but is not declared as a MIDlet icon because the Asha launcher can
 crash while decoding custom icons.
 
-The packaged logo is retained as an optional resource, but is not drawn in the
-reader screens and is not declared as the application icon. Release builds
-force-clean their output directory so obsolete smoke-test classes cannot be
-carried into the JAR.
+The supplied logo is packaged as an optional resource. It is not drawn in the
+reader screens and is not declared as the application icon because custom
+icons can crash the Asha launcher. Release builds force-clean their output
+directory so obsolete smoke-test classes cannot be carried into the JAR.
