@@ -3,11 +3,12 @@ package com.ereader;
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
 import com.ereader.epub.EpubReader;
-import com.ereader.epub.TocEntry;
 import com.ereader.ui.FileBrowserCanvas;
 import com.ereader.ui.LibraryCanvas;
 import com.ereader.ui.ReaderCanvas;
 import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Canvas;
+import javax.microedition.lcdui.Graphics;
 import javax.microedition.midlet.MIDlet;
 
 public final class EReaderMidlet extends MIDlet
@@ -56,20 +57,10 @@ public final class EReaderMidlet extends MIDlet
 
     public void openPath(String path) {
         Book book = new Book(path, path);
-        display.setCurrent(reader);
         if (path.toLowerCase().endsWith(".epub")) {
-            try {
-                reader.openText(book.getTitle(), path, EpubReader.readBook(path));
-                try {
-                    reader.setTableOfContents(EpubReader.readTableOfContents(path));
-                } catch (Exception ignored) {
-                    reader.setTableOfContents(new TocEntry[0]);
-                }
-            } catch (Exception ex) {
-                reader.openText(book.getTitle(), path,
-                        "Unable to open EPUB.\n\n" + ex.toString());
-            }
+            display.setCurrent(new LoadingCanvas(display, reader, book));
         } else {
+            display.setCurrent(reader);
             reader.openBook(book);
         }
     }
@@ -92,5 +83,39 @@ public final class EReaderMidlet extends MIDlet
     }
 
     public void openToc() {
+    }
+
+    private static final class LoadingCanvas extends Canvas implements Runnable {
+        private final Display display;
+        private final ReaderCanvas reader;
+        private final Book book;
+
+        LoadingCanvas(Display display, ReaderCanvas reader, Book book) {
+            this.display = display;
+            this.reader = reader;
+            this.book = book;
+            new Thread(this).start();
+        }
+
+        protected void paint(Graphics graphics) {
+            graphics.setColor(0xFFFFFF);
+            graphics.fillRect(0, 0, getWidth(), getHeight());
+            graphics.setColor(0x000000);
+            graphics.drawString("Opening EPUB...", 4, 4,
+                    Graphics.TOP | Graphics.LEFT);
+            graphics.drawString("Please wait", 4, 24,
+                    Graphics.TOP | Graphics.LEFT);
+        }
+
+        public void run() {
+            try {
+                String text = EpubReader.readFirstChapter(book.getPath());
+                reader.openText(book.getTitle(), book.getPath(), text);
+            } catch (Exception ex) {
+                reader.openText(book.getTitle(), book.getPath(),
+                        "Unable to open EPUB.\n\n" + ex.toString());
+            }
+            display.setCurrent(reader);
+        }
     }
 }

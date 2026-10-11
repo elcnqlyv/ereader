@@ -127,9 +127,11 @@ visible result; the probe now displays the selected path to test that handoff.
 - It excludes EPUB parsing, KXML, JZlib, search/page/TOC screens, and settings
   UI.
 
-The reader probe intentionally treated every selected file as plain text, so an
-EPUB appeared as ZIP gibberish. It now routes `.epub` files through the actual
-EPUB reader and displays a clear error if parsing fails.
+The reader probe initially treated every selected file as plain text, so an
+EPUB appeared as ZIP gibberish. It now shows an `Opening EPUB...` screen and
+loads only the first spine chapter asynchronously. This avoids the redundant
+whole-book and TOC scans while isolating ZIP/XML parsing from full-book memory
+usage.
 
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
