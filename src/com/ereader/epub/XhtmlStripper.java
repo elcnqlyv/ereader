@@ -38,7 +38,15 @@ public final class XhtmlStripper {
         if (value == null) {
             return;
         }
-        output.append(value);
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (ch == '\u2022' || ch == '\u25e6' || ch == '\u25aa'
+                    || ch == '\u25cf' || ch == '\u2043') {
+                output.append("*");
+            } else {
+                output.append(ch);
+            }
+        }
     }
 
     private static void appendBreak(StringBuffer output) {

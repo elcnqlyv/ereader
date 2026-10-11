@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
+import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
 
@@ -39,6 +40,7 @@ public final class ZipReader {
                 } catch (java.io.EOFException endOfFile) {
                     return null;
                 }
+
                 if (signature != LOCAL_SIGNATURE) {
                     return null;
                 }
@@ -73,11 +75,60 @@ public final class ZipReader {
                     skipFully(entry, compressedSize);
                 }
             }
+
         } finally {
             if (input != null) {
                 input.close();
             }
         }
+    }
+
+    public static Hashtable readEntries(InputConnection connection, String[] wantedNames)
+                    throws IOException {
+                Hashtable wanted = new Hashtable();
+                for (int i = 0; i < wantedNames.length; i++) {
+                    wanted.put(wantedNames[i], wantedNames[i]);
+                }
+                Hashtable result = new Hashtable();
+                InputStream input = connection.openInputStream();
+                try {
+                    DataInputStream data = new DataInputStream(input);
+                    while (result.size() < wanted.size()) {
+                        int signature;
+                        try {
+                            signature = readLittleEndianInt(data);
+                        } catch (java.io.EOFException endOfFile) {
+                            break;
+                        }
+                        if (signature != LOCAL_SIGNATURE) {
+                            break;
+                        }
+                        data.readUnsignedByte();
+                        data.readUnsignedByte();
+                        int flags = readLittleEndianShort(data);
+                        int method = readLittleEndianShort(data);
+                        skipFully(data, 8);
+                        long compressedSize = readLittleEndianInt(data) & 0xffffffffL;
+                        long uncompressedSize = readLittleEndianInt(data) & 0xffffffffL;
+                        int nameLength = readLittleEndianShort(data);
+                        int extraLength = readLittleEndianShort(data);
+                        byte[] nameBytes = new byte[nameLength];
+                        data.readFully(nameBytes);
+                        skipFully(data, extraLength);
+                        String name = Utf8.decode(nameBytes);
+                        if (wanted.get(name) != null && (flags & 0x08) == 0) {
+                            LimitedInputStream entry = new LimitedInputStream(data, compressedSize);
+                            result.put(name, inflate(entry, method, uncompressedSize));
+                        } else if ((flags & 0x08) == 0) {
+                            skipFully(data, compressedSize);
+                        } else {
+                            throw new IOException("ZIP data descriptors are unsupported in batch mode");
+                        }
+                    }
+                    return result;
+                } finally {
+                    input.close();
+                }
     }
 
     private static byte[] inflate(InputStream input, int method, long expectedSize) throws IOException {

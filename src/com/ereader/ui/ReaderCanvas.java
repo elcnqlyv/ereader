@@ -157,14 +157,15 @@ public class ReaderCanvas extends Canvas {
         g.setColor(Theme.foreground(settings.getTheme()));
 
         int lineHeight = font.getHeight() + 2;
-        int footerHeight = (font.getHeight() * 2) + 6;
+        int footerHeight = (font.getHeight() * 3) + 8;
         int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
         int maxLines = pageHeight / lineHeight;
         int start = pageIndex * maxLines;
         int end = start + maxLines;
         int y = 10;
 
-        g.drawString(title == null ? "Reader" : title, 8, 4, Graphics.TOP | Graphics.LEFT);
+        g.drawString(fitTitle(title == null ? "Reader" : title, getWidth() - 16),
+                8, 4, Graphics.TOP | Graphics.LEFT);
         if (lines != null) {
             for (int i = start; i < end && i < lines.length; i++) {
                 String line = lines[i];
@@ -183,8 +184,10 @@ public class ReaderCanvas extends Canvas {
             g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, 8, footerY,
                     Graphics.TOP | Graphics.LEFT);
         }
-        g.drawString("7 mark  8 jump  # " + fontName(), 8,
+        g.drawString("7 mark 8 jump # " + fontName(), 8,
                 footerY + font.getHeight() + 2, Graphics.TOP | Graphics.LEFT);
+        g.drawString("0 back", 8, footerY + (font.getHeight() * 2) + 4,
+                Graphics.TOP | Graphics.LEFT);
     }
 
     private void cycleFont() {
@@ -307,10 +310,23 @@ public class ReaderCanvas extends Canvas {
         }
         Font font = getFontForLevel(settings.getFontLevel());
         int lineHeight = font.getHeight() + 2;
-        int footerHeight = (font.getHeight() * 2) + 6;
+        int footerHeight = (font.getHeight() * 3) + 8;
         int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
         int maxLines = pageHeight / lineHeight;
         return (lines.length + maxLines - 1) / Math.max(1, maxLines);
+    }
+
+    private String fitTitle(String value, int width) {
+        Font font = getFontForLevel(settings.getFontLevel());
+        if (font.stringWidth(value) <= width) {
+            return value;
+        }
+        String suffix = "...";
+        int end = value.length();
+        while (end > 0 && font.stringWidth(value.substring(0, end) + suffix) > width) {
+            end--;
+        }
+        return end == 0 ? suffix : value.substring(0, end) + suffix;
     }
 
     private void notifyPositionChanged() {

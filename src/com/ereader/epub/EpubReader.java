@@ -4,6 +4,7 @@ import com.ereader.util.Utf8;
 import java.io.IOException;
 import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
+import java.util.Hashtable;
 
 public final class EpubReader {
     private EpubReader() {
@@ -46,8 +47,9 @@ public final class EpubReader {
         }
         String[] chapters = OpfParser.spinePaths(opf, opfPath);
         StringBuffer book = new StringBuffer();
+        Hashtable chapterData = ZipReader.readEntries(connection, chapters);
         for (int i = 0; i < chapters.length; i++) {
-            byte[] chapter = ZipReader.readEntry(connection, chapters[i]);
+            byte[] chapter = (byte[]) chapterData.get(chapters[i]);
             if (chapter == null) {
                 continue;
             }

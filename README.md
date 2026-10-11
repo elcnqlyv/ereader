@@ -37,6 +37,9 @@ ant sign -Dsign.keystore=/path/to/keystore \
 - Reader: `6` goes to a page, `7` toggles a bookmark, `8` jumps to it,
   and `9` searches (with wrap-around).
 - Reader/settings: `3`, `4`, and `5` select small, medium, and large fonts.
+The reader always shows `0 back` in its footer. EPUB chapter/TOC navigation is
+not yet exposed as a separate menu; chapters are currently combined into one
+reading stream.
 
 The file browser uses JSR-75 `FileConnection` and starts at
 `file:///E:/`. EPUB files are read through the OPF spine and XHTML text is
