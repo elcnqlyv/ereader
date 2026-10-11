@@ -18,7 +18,8 @@ ant run
 
 For phone installation, transfer **both** files to the same folder and open
 `EReader.jad`; do not launch the JAR directly. The release build uses the full
-ProGuard distribution with J2ME preverification required by older Nokia JVMs.
+ProGuard distribution with J2ME preverification and a legacy Java 1.1 class
+format required by older Nokia JVMs.
 
 Signing is intentionally opt-in and takes credentials on the command line;
 no keystore or password is stored in the repository:

@@ -9,6 +9,7 @@
 -dontoptimize
 -dontshrink
 -dontobfuscate
+-target 1.1
 -microedition
 -dontwarn com.jcraft.jzlib.**
 

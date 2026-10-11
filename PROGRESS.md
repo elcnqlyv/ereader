@@ -160,6 +160,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - `v0.1.1` preverified test release prepared after the first device reported `java/lang/VerifyError`
 - fixed EPUB library selection, made EPUB failures visible, adapted menu rows/footer layout to font metrics, and added explicit `3`/`4`/`5` font-size shortcuts
 - corrected ZIP local-header parsing alignment, which caused EPUB `EOFException` failures
+- forced every packaged class to legacy Java 1.1 class format after the Asha reported `ClassFormatError: Bad version information`
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
