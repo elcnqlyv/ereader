@@ -24,4 +24,32 @@ public final class EpubReader {
         }
         return XhtmlStripper.extract(Utf8.decode(chapter));
     }
+
+    public static String readBook(String epubPath) throws IOException {
+        byte[] container = ZipReader.readEntry(epubPath, "META-INF/container.xml");
+        if (container == null) {
+            throw new IOException("EPUB container.xml not found");
+        }
+        String opfPath = ContainerParser.findRootfile(container);
+        byte[] opf = ZipReader.readEntry(epubPath, opfPath);
+        if (opf == null) {
+            throw new IOException("EPUB package file not found");
+        }
+        String[] chapters = OpfParser.spinePaths(opf, opfPath);
+        StringBuffer book = new StringBuffer();
+        for (int i = 0; i < chapters.length; i++) {
+            byte[] chapter = ZipReader.readEntry(epubPath, chapters[i]);
+            if (chapter == null) {
+                continue;
+            }
+            if (book.length() > 0) {
+                book.append("\n\n");
+            }
+            book.append(XhtmlStripper.extract(Utf8.decode(chapter)));
+        }
+        if (book.length() == 0) {
+            throw new IOException("EPUB has no readable chapters");
+        }
+        return book.toString();
+    }
 }

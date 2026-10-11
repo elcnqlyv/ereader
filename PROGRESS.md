@@ -145,6 +145,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - settings screen shows the active theme and font choice
 - EPUB foundation dependencies and streaming ZIP/XML helpers are now present
 - first EPUB spine chapter can be extracted, XHTML-stripped, and opened in the reader
+- all readable OPF spine chapters are concatenated with chapter breaks
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
@@ -184,7 +185,7 @@ Remaining Phase 1 files and behavior:
 - [ ] `src/com/ereader/epub/CssSubset.java` — parse a subset of CSS (italic, bold, colors, alignment)
 - [x] `src/com/ereader/epub/EpubReader.java` — facade tying it together
 - [x] Wire `FileBrowserCanvas` to route `.epub` files to `EpubReader`
-- [ ] Chapter navigation UI
+- [x] Basic multi-chapter reading through the OPF spine
 - [ ] TOC UI
 
 **Phase 2 constraints:**

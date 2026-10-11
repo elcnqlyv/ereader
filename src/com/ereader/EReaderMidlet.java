@@ -106,7 +106,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             LibraryStore.addOrUpdate(book);
         } else if (lower.indexOf(".epub") >= 0) {
             try {
-                String text = EpubReader.readFirstChapter(path);
+                String text = EpubReader.readBook(path);
                 Book book = new Book(displayName(path), path);
                 display.setCurrent(readerCanvas);
                 currentBook = book;

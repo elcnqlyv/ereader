@@ -3,6 +3,7 @@ package com.ereader.epub;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 
@@ -11,8 +12,16 @@ public final class OpfParser {
     }
 
     public static String firstSpinePath(byte[] opf, String opfPath) throws IOException {
+        String[] paths = spinePaths(opf, opfPath);
+        if (paths.length == 0) {
+            throw new IOException("OPF has no readable spine");
+        }
+        return paths[0];
+    }
+
+    public static String[] spinePaths(byte[] opf, String opfPath) throws IOException {
         Hashtable manifest = new Hashtable();
-        String spineId = null;
+        Vector spineIds = new Vector();
         try {
             KXmlParser parser = new KXmlParser();
             parser.setInput(new ByteArrayInputStream(opf), "UTF-8");
@@ -28,17 +37,31 @@ public final class OpfParser {
                     if (id != null && href != null) {
                         manifest.put(id, href);
                     }
-                } else if ("itemref".equalsIgnoreCase(name) && spineId == null) {
-                    spineId = parser.getAttributeValue(null, "idref");
+                } else if ("itemref".equalsIgnoreCase(name)) {
+                    String idref = parser.getAttributeValue(null, "idref");
+                    if (idref != null) {
+                        spineIds.addElement(idref);
+                    }
                 }
             }
         } catch (Exception ex) {
             throw new IOException("Invalid OPF package");
         }
-        if (spineId == null || !manifest.containsKey(spineId)) {
+        if (spineIds.size() == 0) {
             throw new IOException("OPF has no readable spine");
         }
-        return resolve(opfPath, (String) manifest.get(spineId));
+        Vector paths = new Vector();
+        for (int i = 0; i < spineIds.size(); i++) {
+            String href = (String) manifest.get(spineIds.elementAt(i));
+            if (href != null) {
+                paths.addElement(resolve(opfPath, href));
+            }
+        }
+        String[] result = new String[paths.size()];
+        for (int i = 0; i < paths.size(); i++) {
+            result[i] = (String) paths.elementAt(i);
+        }
+        return result;
     }
 
     private static String resolve(String opfPath, String href) {
