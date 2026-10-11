@@ -153,6 +153,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - Ant now merges those runtime classes into the MIDlet before ProGuard packaging
 - README now documents build commands, controls, and supported book formats
 - optional `ant sign` target added without storing signing credentials; it refreshes JAD size after signing
+- bounded MicroEmulator smoke check completed successfully after packaging; the launcher was terminated by the test timeout to avoid leaving a persistent GUI process
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
