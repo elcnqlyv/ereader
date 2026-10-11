@@ -50,7 +50,7 @@
         </java>
     </target>
 
-    <target name="package" depends="preverify">
+    <target name="package" depends="clean,preverify">
         <mkdir dir="${dist.dir}" />
         <jar destfile="${dist.dir}/${jar.name}"
              basedir="${prever}"
@@ -58,7 +58,7 @@
         <length file="${dist.dir}/${jar.name}" property="jar.size" />
         <echo file="${dist.dir}/${jad.name}">MIDlet-1: EReader, , com.ereader.EReaderMidlet
 MIDlet-Name: EReader
-MIDlet-Version: 0.1
+MIDlet-Version: 0.2
 MIDlet-Vendor: Elchin
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0

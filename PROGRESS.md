@@ -54,6 +54,24 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 ## What's Been Done
 
+### ✅ 2026-10-11 — Startup crash isolation build
+
+- Removed `MIDlet-Icon` from the manifest. The Asha launcher may decode the icon
+  before starting the MIDlet, and this was never reproducible in MicroEmulator.
+  `res/logo.png` remains packaged as an optional resource.
+- Deferred construction of `FileBrowserCanvas` until the user presses `1`.
+  Startup no longer opens `file:///E:/` or requests file access before the
+  library is visible.
+- Bumped the package to version `0.2` so the diagnostic build is installed as
+  a new application version.
+- Made `package` depend on `clean`, preventing stale classes such as the old
+  `EReaderMidlet$HelloCanvas` smoke-test class from entering a release.
+- Rebuilt from a clean tree: `dist/EReader.jar` is 143310 bytes, contains no
+  `HelloCanvas`, uses class-file major version 45, and has no `MIDlet-Icon`.
+- The bounded MicroEmulator startup test completed without an exception. This
+  is only a desktop compatibility check; real Asha confirmation is still
+  required.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed

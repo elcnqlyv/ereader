@@ -48,10 +48,11 @@ file access once; accept that request to allow the book to be read.
 
 The JAR contains the complete MIDlet manifest and can be installed directly on
 phones that do not expose JAD files. The JAD is optional metadata for phones
-that require descriptor-based installation. The JAR also declares `/logo.png`
-as its MIDlet icon.
+that require descriptor-based installation. The logo remains packaged as a
+resource, but is not declared as a MIDlet icon because the Asha launcher can
+crash while decoding custom icons.
 
-The packaged logo is used as the application icon. It is not drawn in the
-upper-right corner of the reader screens. The icon uses the opaque indexed PNG
-format known to work with the Asha launcher. Release builds force-clean their
-output directory so obsolete smoke-test classes cannot be carried into the JAR.
+The packaged logo is retained as an optional resource, but is not drawn in the
+reader screens and is not declared as the application icon. Release builds
+force-clean their output directory so obsolete smoke-test classes cannot be
+carried into the JAR.

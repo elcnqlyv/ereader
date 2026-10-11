@@ -39,8 +39,6 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             settings = SettingsStore.load();
             libraryCanvas = new LibraryCanvas(settings);
             libraryCanvas.setBookSelectionListener(this);
-            browserCanvas = new FileBrowserCanvas(settings);
-            browserCanvas.setPathSelectionListener(this);
             readerCanvas = new ReaderCanvas(settings);
             readerCanvas.setReaderListener(this);
             settingsCanvas = new SettingsCanvas(settings);
@@ -80,6 +78,10 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
 
     public void openBrowser() {
         if (display != null) {
+            if (browserCanvas == null) {
+                browserCanvas = new FileBrowserCanvas(settings);
+                browserCanvas.setPathSelectionListener(this);
+            }
             browserCanvas.refresh();
             display.setCurrent(browserCanvas);
         }
