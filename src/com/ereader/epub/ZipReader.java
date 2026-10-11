@@ -85,7 +85,8 @@ public final class ZipReader {
     }
 
     private static byte[] inflateDeflated(InputStream input, long expectedSize) throws IOException {
-        com.jcraft.jzlib.Inflater inflater = new com.jcraft.jzlib.Inflater(true);
+        com.jcraft.jzlib.Inflater inflater = new com.jcraft.jzlib.Inflater(
+                com.jcraft.jzlib.JZlib.MAX_WBITS, true);
         ByteArrayOutputStream output = new ByteArrayOutputStream(
                 (int) Math.min(expectedSize, 32768));
         byte[] compressed = new byte[512];
