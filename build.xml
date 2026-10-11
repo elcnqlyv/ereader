@@ -77,6 +77,51 @@ MIDlet-Jar-Size: ${jar.size}
         </java>
     </target>
 
+    <target name="diagnostic-clean">
+        <delete dir="${build.dir}/diagnostic-classes" />
+        <delete dir="${build.dir}/diagnostic-preverified" />
+        <delete dir="${dist.dir}/launch-probe.jar" />
+        <delete dir="${dist.dir}/launch-probe.jad" />
+    </target>
+
+    <target name="diagnostic-compile" depends="diagnostic-clean">
+        <mkdir dir="${build.dir}/diagnostic-classes" />
+        <javac srcdir="diagnostic/src"
+               destdir="${build.dir}/diagnostic-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="diagnostic-preverify" depends="diagnostic-compile">
+        <mkdir dir="${build.dir}/diagnostic-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/probe.pro" />
+        </java>
+    </target>
+
+    <target name="diagnostic" depends="diagnostic-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/launch-probe.jar"
+             basedir="${build.dir}/diagnostic-preverified"
+             manifest="diagnostic/PROBE-MANIFEST.MF" />
+        <length file="${dist.dir}/launch-probe.jar" property="probe.jar.size" />
+        <echo file="${dist.dir}/launch-probe.jad">MIDlet-1: Launch probe, , com.ereader.diagnostic.LaunchProbeMidlet
+MIDlet-Name: EReader launch probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: launch-probe.jar
+MIDlet-Jar-Size: ${probe.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />

@@ -72,6 +72,19 @@ export PATH=$JAVA_HOME/bin:$PATH
   is only a desktop compatibility check; real Asha confirmation is still
   required.
 
+### 🔬 2026-10-11 — Added a minimal launch probe
+
+- The reported black/white display cycle does not provide an application-level
+  error log, so a second EReader build would not isolate the failing layer.
+- Added `ant diagnostic`, which produces `dist/launch-probe.jar` containing
+  only one preverified MIDlet and one blank `Canvas`.
+- The probe has no icon, RMS access, JSR-75 access, KXML, JZlib, EPUB code, or
+  application screens. It uses class-file major version 45.
+- If the probe also causes the black/white cycle, the failure is outside the
+  EReader code and should be investigated as a Series 40 Java installation,
+  firmware, memory, or device-runtime issue. If it displays `Launch probe OK`,
+  the EReader startup graph remains the relevant layer.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed
