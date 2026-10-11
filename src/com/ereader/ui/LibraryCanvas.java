@@ -46,8 +46,10 @@ public class LibraryCanvas extends Canvas {
         } else if (action == DOWN) {
             selectedIndex = Math.min(books.size() - 1, selectedIndex + 1);
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
-            if (listener != null) {
-                listener.openBook((Book) books.elementAt(selectedIndex));
+            Book selected = (Book) books.elementAt(selectedIndex);
+            if (listener != null && selected.getPath() != null
+                    && selected.getPath().toLowerCase().indexOf(".txt") >= 0) {
+                listener.openBook(selected);
             }
         } else if (keyCode == KEY_NUM1) {
             if (listener != null) {
@@ -77,9 +79,12 @@ public class LibraryCanvas extends Canvas {
         g.setFont(titleFont);
         g.drawString("Library", 4, 4, Graphics.TOP | Graphics.LEFT);
 
+        int rowHeight = 16;
+        int visibleRows = Math.max(1, (getHeight() - 40) / rowHeight);
+        int first = selectedIndex >= visibleRows ? selectedIndex - visibleRows + 1 : 0;
+        int last = Math.min(books.size(), first + visibleRows);
         int y = 22;
-        int max = Math.min(books.size(), 12);
-        for (int i = 0; i < max; i++) {
+        for (int i = first; i < last; i++) {
             Book book = (Book) books.elementAt(i);
             String label = book.getTitle();
             if (i == selectedIndex) {
@@ -90,7 +95,7 @@ public class LibraryCanvas extends Canvas {
                 g.setColor(Theme.foreground(settings.getTheme()));
             }
             g.drawString(label, 4, y, Graphics.TOP | Graphics.LEFT);
-            y += 16;
+            y += rowHeight;
         }
 
         g.setColor(Theme.accent(settings.getTheme()));

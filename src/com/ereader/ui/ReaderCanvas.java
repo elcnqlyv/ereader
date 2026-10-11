@@ -21,6 +21,7 @@ public class ReaderCanvas extends Canvas {
     private Settings settings;
     private String currentPath;
     private String title;
+    private String sourceText;
     private String[] lines;
     private int pageIndex;
     private ReaderListener listener;
@@ -65,7 +66,8 @@ public class ReaderCanvas extends Canvas {
         } catch (Exception ex) {
             text = "Unable to open file.\n\n" + path;
         }
-        lines = paginate(text);
+        sourceText = text;
+        lines = paginate(sourceText);
         if (pageIndex >= getPageCount()) {
             pageIndex = 0;
         }
@@ -107,6 +109,13 @@ public class ReaderCanvas extends Canvas {
                 next = Settings.FONT_SMALL;
             }
             settings.setFontLevel(next);
+            if (sourceText != null) {
+                lines = paginate(sourceText);
+                if (pageIndex >= getPageCount()) {
+                    pageIndex = Math.max(0, getPageCount() - 1);
+                    notifyPositionChanged();
+                }
+            }
             repaint();
         }
     }
