@@ -138,6 +138,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - reader input streams and connections closed after loading
 - JSR-75 `FileConnection` support added for real directory enumeration
 - reader wrapping now uses font metrics and display width, with CRLF normalization
+- file-browser listings keep the selected row visible in long directories
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 

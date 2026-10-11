@@ -112,8 +112,15 @@ public class FileBrowserCanvas extends Canvas {
         g.setFont(font);
         g.drawString("File Browser", 4, 4, Graphics.TOP | Graphics.LEFT);
 
+        int rowHeight = 16;
+        int first = 0;
+        int visibleRows = Math.max(1, (getHeight() - 40) / rowHeight);
+        if (selectedIndex >= visibleRows) {
+            first = selectedIndex - visibleRows + 1;
+        }
+        int last = Math.min(labels.length, first + visibleRows);
         int y = 22;
-        for (int i = 0; i < labels.length; i++) {
+        for (int i = first; i < last; i++) {
             String label = labels[i];
             if (i == selectedIndex) {
                 g.setColor(Theme.accent(settings.getTheme()));
@@ -123,7 +130,7 @@ public class FileBrowserCanvas extends Canvas {
                 g.setColor(Theme.foreground(settings.getTheme()));
             }
             g.drawString(label, 4, y, Graphics.TOP | Graphics.LEFT);
-            y += 16;
+            y += rowHeight;
         }
         g.setColor(Theme.accent(settings.getTheme()));
         g.drawString("0 back  select file", 4, getHeight() - 12,
