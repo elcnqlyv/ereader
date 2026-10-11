@@ -228,6 +228,68 @@ MIDlet-Jar-Size: ${settings.jar.size}
 </echo>
     </target>
 
+    <target name="library-clean">
+        <delete dir="${build.dir}/library-classes" />
+        <delete dir="${build.dir}/library-preverified" />
+        <delete file="${dist.dir}/ereader-library-probe.jar" />
+        <delete file="${dist.dir}/ereader-library-probe.jad" />
+    </target>
+
+    <target name="library-compile" depends="library-clean">
+        <mkdir dir="${build.dir}/library-classes" />
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/library-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="com/ereader/model/Book.java" />
+            <include name="com/ereader/model/Settings.java" />
+            <include name="com/ereader/store/LibraryStore.java" />
+            <include name="com/ereader/util/Utf8.java" />
+            <include name="com/ereader/ui/Theme.java" />
+            <include name="com/ereader/ui/LibraryCanvas.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <javac srcdir="diagnostic/library-src"
+               destdir="${build.dir}/library-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${build.dir}/library-classes"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="library-preverify" depends="library-compile">
+        <mkdir dir="${build.dir}/library-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/library.pro" />
+        </java>
+    </target>
+
+    <target name="library" depends="library-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-library-probe.jar"
+             basedir="${build.dir}/library-preverified"
+             manifest="diagnostic/LIBRARY-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-library-probe.jar" property="library.jar.size" />
+        <echo file="${dist.dir}/ereader-library-probe.jad">MIDlet-1: EReader library probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader library probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-library-probe.jar
+MIDlet-Jar-Size: ${library.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />

@@ -102,6 +102,13 @@ export PATH=$JAVA_HOME/bin:$PATH
   `Settings` model, and a blank Canvas.
 - It excludes the library, file browser, reader, EPUB parser, KXML, and JZlib.
 
+### 🔬 2026-10-11 — Added a library startup probe
+
+- Added `ant library`, producing `dist/ereader-library-probe.jar`.
+- This tests `LibraryStore.load()`, `Book`, `Theme`, and `LibraryCanvas`
+  rendering with the exact EReader MIDlet class name.
+- It excludes JSR-75, the reader, EPUB parsing, KXML, and JZlib.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed
