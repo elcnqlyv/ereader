@@ -296,12 +296,16 @@ public class ReaderCanvas extends Canvas {
         Font font = getFontForLevel(settings.getFontLevel());
         int maxLines = Math.max(1, (getHeight() - 24) / (font.getHeight() + 2));
         int start = Math.min(lines.length, (pageIndex + 1) * maxLines);
-        for (int i = start; i < lines.length; i++) {
+        for (int pass = 0; pass < 2; pass++) {
+            int first = pass == 0 ? start : 0;
+            int last = pass == 0 ? lines.length : start;
+            for (int i = first; i < last; i++) {
             if (lines[i].toLowerCase().indexOf(target) >= 0) {
                 pageIndex = i / maxLines;
                 notifyPositionChanged();
                 repaint();
                 return true;
+            }
             }
         }
         return false;

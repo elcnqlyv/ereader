@@ -145,6 +145,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - settings screen shows the active theme and font choice
 - reader supports bookmark toggle (`7`) and jump to the saved bookmark (`8`)
 - reader supports forward in-book search from the current page (`9`)
+- in-book search wraps to the beginning after reaching the end
 - reader supports go-to-page from numeric input (`6`)
 - EPUB foundation dependencies and streaming ZIP/XML helpers are now present
 - first EPUB spine chapter can be extracted, XHTML-stripped, and opened in the reader
