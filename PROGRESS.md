@@ -1,0 +1,229 @@
+# EReader — J2ME EPUB Reader for Nokia Asha 302
+
+**Progress Log & Roadmap**
+
+---
+
+## Project Goal
+
+A J2ME MIDlet EPUB reader for the Nokia Asha 302 (Series 40, MIDP 2.0, CLDC 1.1, 320×240 landscape QWERTY).
+
+**Requirements:**
+- Reads DRM-free EPUB 2 and EPUB 3 from SD card (`file:///E:/`)
+- Also reads plain `.txt` files (Phase 1 proof of concept)
+- File browser + library screen with cover thumbnails
+- Paginated reader, Apple Books-style (right arrow = next page)
+- Table of contents, chapter navigation, bookmarks, in-book search, go-to-page
+- Themes: **Sepia** and **Gruvbox Dark**, switchable
+- Adjustable font size, line spacing, margins
+- Saves last position per book (RMS)
+- Azerbaijani, Cyrillic, and English text support
+- File browser rooted at SD card
+- Signed JAR preferred, but unsigned OK if signing is blocked
+
+**License:** CC BY-NC-SA 4.0 (noncommercial, share-alike).
+
+---
+
+## Development Environment (Final Choice)
+
+We abandoned NetBeans 8.2 + Sun WTK because:
+- Oracle locked the WTK behind a login wall
+- NetBeans 8.2 mirrors are 404 / rate-limited
+- The WTK emulator is broken on modern Arch Linux
+
+Instead we use a **lean, CLI-driven toolchain**:
+
+| Component | Path | Version | Purpose |
+|---|---|---|---|
+| 32-bit JDK 8 (Zulu) | `/usr/lib/jvm/java-8-openjdk-32` | 1.8.0_504 | Compile + run tools |
+| Apache Ant | system package | 1.10.17 | Build automation |
+| ProGuard | `~/tools/proguard-6.2.2/lib/proguard.jar` | 6.2.2 | Preverification / obfuscation |
+| MicroEmulator | `~/netbeans/microemulator-2.0.4/` | 2.0.4 | Test emulator |
+| J2ME API jars | `~/ereader/lib/` | CLDC 1.1 / MIDP 2.0 | Compile-time classpath |
+| VS Code | system package | latest | Editor |
+
+**Environment variables** (add to `~/.bashrc`):
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-32
+export PROGUARD_HOME=$HOME/tools/proguard-6.2.2
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+---
+
+## What's Been Done
+
+### ✅ 1. Toolchain installed and verified
+
+- [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed
+- [x] 32-bit JDK 8 (Zulu) downloaded from Azul CDN, extracted to `/usr/lib/jvm/java-8-openjdk-32`, registered with `archlinux-java`
+- [x] Verified: `java -version` → `1.8.0_504` (Zulu 32-bit)
+- [x] Apache Ant installed via `pacman`
+- [x] ProGuard 6.2.2 jar downloaded from Maven Central
+- [x] MicroEmulator 2.0.4 downloaded from SourceForge, verified working (ran the bundled demo)
+
+**Dead ends we hit (documented for posterity):**
+- Oracle JDK direct downloads (BundleId guessing, login redirects)
+- Adoptium API for JDK 8 x86 — no such build exists
+- NetBeans 8.2 installer links (all 404 or 500)
+- Sun WTK 2.5.2 download (returns an HTML login page, not the installer)
+- `yay -S netbeans8` — AUR package deleted
+
+### ✅ 2. Project skeleton created
+
+Directory: `~/ereader/`
+
+```
+ereader/
+├── .vscode/              (settings.json — TODO, see below)
+├── lib/
+│   ├── cldcapi11.jar
+│   ├── midpapi20.jar
+│   └── microemu-nokiaui.jar
+├── res/                  (empty for now)
+├── src/
+│   └── com/ereader/
+│       ├── EReaderMidlet.java     (smoke test only)
+│       ├── model/                 (empty)
+│       ├── store/                 (empty)
+│       ├── ui/                    (empty)
+│       └── util/                  (empty)
+├── MANIFEST.MF
+├── proguard.pro
+└── build.xml
+```
+
+### ✅ 3. Build files authored
+
+- `MANIFEST.MF` — MIDlet descriptor
+- `build.xml` — Ant script (clean / compile / preverify / package / run)
+- `proguard.pro` — ProGuard rules (currently with `-microedition` removed)
+- `src/com/ereader/EReaderMidlet.java` — smoke test MIDlet (draws sepia canvas, "Smoke test OK")
+
+### ⏳ 4. Smoke test — **IN PROGRESS**
+
+The last build attempt failed with:
+
+```
+Error: Unable to access jarfile /home/elchin/ereader/${env.PROGUARD_HOME}/lib/proguard.jar
+```
+
+**Root cause:** Ant does not automatically load environment variables. Fix is to add `<property environment="env" />` to `build.xml`, or replace `env.PROGUARD_HOME` with `${user.home}/tools/proguard-6.2.2` (preferred — no env dependency).
+
+**Also needed:** remove `-microedition` from `proguard.pro` for now, since the Maven-Central ProGuard jar (`proguard-base`) doesn't include the preverifier.
+
+---
+
+## What Needs To Be Done
+
+### 🔴 Immediate (Phase 1 smoke test — finish this first)
+
+- [ ] Fix `build.xml`: add `<property environment="env" />` and switch ProGuard path to `${user.home}/tools/proguard-6.2.2/lib/proguard.jar`
+- [ ] Fix `build.xml` `run` target: use `${user.home}/netbeans/microemulator-2.0.4/microemulator.jar`
+- [ ] Remove `-microedition` from `proguard.pro`
+- [ ] Run `ant clean package` → must produce `dist/EReader.jar` and `dist/EReader.jad`
+- [ ] Run `ant run` → MicroEmulator should open with sepia canvas
+
+**Blocking:** Cannot proceed until this works. If it fails, paste error output.
+
+### 🟡 Phase 1 — Text reader (MVP on the phone)
+
+Full source code for these files was already provided in the conversation. Just paste them in:
+
+- [ ] `src/com/ereader/util/Utf8.java` — UTF-8 encode/decode helpers
+- [ ] `src/com/ereader/model/Settings.java` — settings POJO
+- [ ] `src/com/ereader/model/Book.java` — book record
+- [ ] `src/com/ereader/model/Bookmark.java` — bookmark record
+- [ ] `src/com/ereader/store/SettingsStore.java` — RMS persistence
+- [ ] `src/com/ereader/store/LibraryStore.java` — RMS library persistence
+- [ ] `src/com/ereader/store/BookmarkStore.java` — RMS bookmark persistence
+- [ ] `src/com/ereader/ui/Theme.java` — Sepia + Gruvbox Dark themes
+- [ ] `src/com/ereader/ui/ReaderCanvas.java` — paginated text reader
+- [ ] `src/com/ereader/ui/LibraryCanvas.java` — library list
+- [ ] `src/com/ereader/ui/FileBrowserCanvas.java` — SD-card file browser
+- [ ] `src/com/ereader/ui/SettingsCanvas.java` — settings screen (partial code exists)
+- [ ] `src/com/ereader/EReaderMidlet.java` — real MIDlet (replaces smoke test)
+
+**Phase 1 exit criteria:**
+- App installs and runs on the Asha 302
+- File browser navigates the SD card, opens `.txt` files
+- Reader paginates, arrow keys page forward/back
+- Theme toggle (`*`), font size toggle (`#`)
+- Position saved on exit, restored on reopen
+- Library lists recently opened books
+
+### 🟢 Phase 2 — EPUB support
+
+- [ ] Add `kxml2-2.3.0.jar` and `jzlib-1.1.3.jar` to `lib/`
+- [ ] `src/com/ereader/epub/ZipReader.java` — ZIP central directory reader + inflater using JZlib
+- [ ] `src/com/ereader/epub/ContainerParser.java` — parse `META-INF/container.xml`
+- [ ] `src/com/ereader/epub/OpfParser.java` — parse OPF: metadata, spine, manifest
+- [ ] `src/com/ereader/epub/NcxParser.java` — parse NCX / EPUB 3 nav doc for TOC
+- [ ] `src/com/ereader/epub/XhtmlStripper.java` — extract text from XHTML, minimal inline markup
+- [ ] `src/com/ereader/epub/ImageDecoder.java` — decode PNG/JPEG from ZIP for inline charts
+- [ ] `src/com/ereader/epub/CssSubset.java` — parse a subset of CSS (italic, bold, colors, alignment)
+- [ ] `src/com/ereader/epub/EpubReader.java` — facade tying it together
+- [ ] Wire `FileBrowserCanvas` to route `.epub` files to `EpubReader`
+- [ ] Chapter navigation UI
+- [ ] TOC UI
+
+**Phase 2 constraints:**
+- Heap is tight (few MB). Stream chapter-by-chapter; do not load the full book into memory.
+- Ignore unsupported CSS rather than failing.
+- Images must be decoded incrementally if large.
+
+### 🔵 Phase 3 — Polish & signing
+
+- [ ] In-book search (stream text, match offsets)
+- [ ] Bookmarks UI (list, jump, delete)
+- [ ] Go-to-page / go-to-percent dialog
+- [ ] Cover thumbnails on library screen (decode cover image, downscale)
+- [ ] Font size finer control (5 levels instead of 3)
+- [ ] Proper `-microedition` preverification using the **full ProGuard distribution**
+- [ ] Sign JAR for the phone:
+  - Option A: `keytool` self-signed cert + `jarsigner`
+  - Option B: grab `jadtool` from an archived WTK and sign properly
+- [ ] Copy signed JAR+JAD to SD card, install on the real phone
+- [ ] Add a Nokia Asha 302 **device profile to MicroEmulator** so testing matches 320×240
+
+---
+
+## Known Gotchas & Workarounds
+
+### Ant environment variables
+Ant does not read `os.environ` by default. `<property environment="env" />` must appear before any `${env.*}` reference. **Preferred:** avoid `env.*` altogether and use `${user.home}`.
+
+### ProGuard `-microedition`
+Requires the **full ProGuard distribution** (not the `proguard-base` jar from Maven Central). The full distribution includes the J2ME preverifier. When we're ready for real-phone packaging, download:
+
+```
+https://github.com/Guardsquare/proguard/releases/download/v6.2.2/proguard-6.2.2.zip
+```
+
+If preverification cannot be obtained, MIDP devices will often still run non-preverified JARs, but with warnings. Worth testing.
+
+### JDK 8 `source`/`target`
+JDK 8 javac rejects `source="1.4"`. If the build fails on that, change to `source="1.5" target="1.5"`. CLDC 1.1 targets Java 1.3 language level, but 1.4 source is the closest javac accepts; 1.5 is a common practical compromise and works in practice for MIDlets.
+
+### MicroEmulator device sizing
+Default device is a small portrait phone. To match the Asha 302, use the "large" device or configure a 320×240 profile. We'll do this in Phase 3.
+
+### File paths on the real phone
+The Asha 302 exposes the memory card as `file:///E:/` via JSR-75 `FileConnection`. Root of the browser should be `E:/` and default books folder `E:/Books/`. Empty `E:/` will fall through to the list of drives if the folder doesn't exist.
+
+---
+
+## Next Action
+
+**Fix `build.xml` and `proguard.pro` per the "Immediate" section above, then run:**
+
+```bash
+cd ~/ereader
+ant clean package
+ant run
+```
+
+**Success = a MicroEmulator window showing a sepia canvas with "EReader" and "Smoke test OK".**
+
+Once that appears, we move to Phase 1: paste in the real reader source files.

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EReader" default="package" basedir=".">
+    <property name="jdk8"      value="/usr/lib/jvm/java-8-openjdk-32" />
+    <property name="proguard"  value="${env.PROGUARD_HOME}/lib/proguard.jar" />
+    <property name="lib.dir"   value="lib" />
+    <property name="src.dir"   value="src" />
+    <property name="res.dir"   value="res" />
+    <property name="build.dir" value="build" />
+    <property name="dist.dir"  value="dist" />
+    <property name="classes"   value="${build.dir}/classes" />
+    <property name="prever"    value="${build.dir}/preverified" />
+    <property name="jar.name"  value="EReader.jar" />
+    <property name="jad.name"  value="EReader.jad" />
+
+    <path id="libs.path">
+        <fileset dir="${lib.dir}"><include name="**/*.jar"/></fileset>
+    </path>
+
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+    </target>
+
+    <target name="compile">
+        <mkdir dir="${classes}" />
+        <javac srcdir="${src.dir}"
+               destdir="${classes}"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpathref="libs.path"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <copy todir="${classes}">
+            <fileset dir="${res.dir}" erroronmissingdir="false" />
+        </copy>
+    </target>
+
+    <target name="preverify" depends="compile">
+        <mkdir dir="${prever}" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@proguard.pro" />
+        </java>
+    </target>
+
+    <target name="package" depends="preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/${jar.name}"
+             basedir="${prever}"
+             manifest="MANIFEST.MF" />
+        <loadfile property="manifest.content" srcFile="MANIFEST.MF" />
+        <length file="${dist.dir}/${jar.name}" property="jar.size" />
+        <echo file="${dist.dir}/${jad.name}">${manifest.content}
+MIDlet-Jar-URL: ${jar.name}
+MIDlet-Jar-Size: ${jar.size}
+</echo>
+    </target>
+
+    <target name="run" depends="package">
+        <java jar="${env.HOME}/netbeans/microemulator-2.0.4/microemulator.jar" fork="true" failonerror="true">
+            <arg value="${dist.dir}/${jad.name}" />
+        </java>
+    </target>
+</project>
