@@ -32,12 +32,16 @@ public final class LibraryStore {
                     continue;
                 }
                 int idx = line.indexOf('|');
+                int positionIdx = line.lastIndexOf('|');
                 if (idx <= 0) {
                     continue;
                 }
                 String title = line.substring(0, idx);
-                String path = line.substring(idx + 1);
+                String path = positionIdx > idx ? line.substring(idx + 1, positionIdx) : line.substring(idx + 1);
                 Book book = new Book(title, path);
+                if (positionIdx > idx) {
+                    book.setLastPosition(parseInt(line.substring(positionIdx + 1), 0));
+                }
                 books.addElement(book);
             }
             return books;
@@ -55,7 +59,8 @@ public final class LibraryStore {
             if (book == null || book.getPath() == null) {
                 continue;
             }
-            buffer.append(book.getTitle()).append('|').append(book.getPath()).append('\n');
+            buffer.append(book.getTitle()).append('|').append(book.getPath()).append('|')
+                  .append(book.getLastPosition()).append('\n');
         }
         byte[] data = Utf8.encode(buffer.toString());
 
@@ -105,5 +110,13 @@ public final class LibraryStore {
             result[i] = (String) lines.elementAt(i);
         }
         return result;
+    }
+
+    private static int parseInt(String value, int fallback) {
+        try {
+            return Integer.parseInt(value);
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 }

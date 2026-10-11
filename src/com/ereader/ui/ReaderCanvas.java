@@ -4,6 +4,7 @@ import com.ereader.model.Book;
 import com.ereader.model.Settings;
 import com.ereader.util.Utf8;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.InputConnection;
@@ -12,15 +13,25 @@ import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
 
 public class ReaderCanvas extends Canvas {
+    public interface ReaderListener {
+        void positionChanged(int page);
+        void closeReader();
+    }
+
     private Settings settings;
     private String currentPath;
     private String title;
     private String[] lines;
     private int pageIndex;
+    private ReaderListener listener;
 
     public ReaderCanvas(Settings settings) {
         this.settings = settings;
         setFullScreenMode(true);
+    }
+
+    public void setReaderListener(ReaderListener listener) {
+        this.listener = listener;
     }
 
     public void openBook(Book book) {
@@ -29,7 +40,7 @@ public class ReaderCanvas extends Canvas {
         }
         title = book.getTitle();
         currentPath = book.getPath();
-        pageIndex = 0;
+        pageIndex = book.getLastPosition();
         loadFromPath(currentPath);
     }
 
@@ -38,18 +49,21 @@ public class ReaderCanvas extends Canvas {
         String text = "Unable to open file.\n\n" + path;
         try {
             InputConnection con = (InputConnection) Connector.open(currentPath, Connector.READ);
+            InputStream input = con.openInputStream();
             byte[] buffer = new byte[512];
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             int read;
-            while ((read = con.openInputStream().read(buffer)) != -1) {
+            while ((read = input.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
             }
-            con.openInputStream().close();
+            input.close();
+            con.close();
             text = Utf8.decode(out.toByteArray());
             if (text == null || text.length() == 0) {
                 text = "Empty file.";
             }
         } catch (Exception ex) {
+            text = "Unable to open file.\n\n" + path;
         }
         lines = paginate(text);
         if (pageIndex >= getPageCount()) {
@@ -61,6 +75,7 @@ public class ReaderCanvas extends Canvas {
     public void nextPage() {
         if (pageIndex < getPageCount() - 1) {
             pageIndex++;
+            notifyPositionChanged();
             repaint();
         }
     }
@@ -68,6 +83,7 @@ public class ReaderCanvas extends Canvas {
     public void previousPage() {
         if (pageIndex > 0) {
             pageIndex--;
+            notifyPositionChanged();
             repaint();
         }
     }
@@ -78,6 +94,10 @@ public class ReaderCanvas extends Canvas {
             previousPage();
         } else if (action == RIGHT || action == DOWN) {
             nextPage();
+        } else if (keyCode == KEY_NUM0) {
+            if (listener != null) {
+                listener.closeReader();
+            }
         } else if (keyCode == KEY_STAR) {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
             repaint();
@@ -199,5 +219,11 @@ public class ReaderCanvas extends Canvas {
         int pageHeight = getHeight() - 24;
         int maxLines = pageHeight / lineHeight;
         return (lines.length + maxLines - 1) / Math.max(1, maxLines);
+    }
+
+    private void notifyPositionChanged() {
+        if (listener != null) {
+            listener.positionChanged(pageIndex);
+        }
     }
 }

@@ -13,7 +13,8 @@ import javax.microedition.lcdui.Display;
 import javax.microedition.midlet.MIDlet;
 
 public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
-        FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener {
+        FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener,
+        ReaderCanvas.ReaderListener {
 
     private Display display;
     private Settings settings;
@@ -21,6 +22,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     private FileBrowserCanvas browserCanvas;
     private ReaderCanvas readerCanvas;
     private SettingsCanvas settingsCanvas;
+    private Book currentBook;
 
     public void startApp() {
         if (display == null) {
@@ -31,6 +33,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             browserCanvas = new FileBrowserCanvas(settings);
             browserCanvas.setPathSelectionListener(this);
             readerCanvas = new ReaderCanvas(settings);
+            readerCanvas.setReaderListener(this);
             settingsCanvas = new SettingsCanvas(settings);
             settingsCanvas.setSettingsChangeListener(this);
         }
@@ -55,6 +58,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             return;
         }
         display.setCurrent(readerCanvas);
+        currentBook = book;
         readerCanvas.openBook(book);
         LibraryStore.addOrUpdate(book);
     }
@@ -95,6 +99,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         if (path.toLowerCase().indexOf(".txt") >= 0 || path.toLowerCase().indexOf(".md") >= 0) {
             Book book = new Book(path, path);
             display.setCurrent(readerCanvas);
+            currentBook = book;
             readerCanvas.openBook(book);
             LibraryStore.addOrUpdate(book);
         } else {
@@ -105,5 +110,19 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     public void settingsChanged(Settings settings) {
         this.settings = settings;
         SettingsStore.save(this.settings);
+    }
+
+    public void positionChanged(int page) {
+        if (currentBook != null) {
+            currentBook.setLastPosition(page);
+            LibraryStore.addOrUpdate(currentBook);
+        }
+    }
+
+    public void closeReader() {
+        if (display != null) {
+            libraryCanvas.refresh();
+            display.setCurrent(libraryCanvas);
+        }
     }
 }
