@@ -84,6 +84,32 @@ public final class BookmarkStore {
         save(bookmarks);
     }
 
+    public static boolean toggle(String bookPath, String title, int page) {
+        Vector bookmarks = load();
+        for (int i = 0; i < bookmarks.size(); i++) {
+            Bookmark bookmark = (Bookmark) bookmarks.elementAt(i);
+            if (bookPath.equals(bookmark.getBookPath()) && page == bookmark.getPage()) {
+                bookmarks.removeElementAt(i);
+                save(bookmarks);
+                return false;
+            }
+        }
+        bookmarks.addElement(new Bookmark(bookPath, title, page));
+        save(bookmarks);
+        return true;
+    }
+
+    public static int findPage(String bookPath) {
+        Vector bookmarks = load();
+        for (int i = 0; i < bookmarks.size(); i++) {
+            Bookmark bookmark = (Bookmark) bookmarks.elementAt(i);
+            if (bookPath.equals(bookmark.getBookPath())) {
+                return bookmark.getPage();
+            }
+        }
+        return -1;
+    }
+
     private static String[] split(String value) {
         if (value == null || value.length() == 0) {
             return new String[0];

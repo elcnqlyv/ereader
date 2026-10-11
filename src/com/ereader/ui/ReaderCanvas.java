@@ -2,6 +2,7 @@ package com.ereader.ui;
 
 import com.ereader.model.Book;
 import com.ereader.model.Settings;
+import com.ereader.store.BookmarkStore;
 import com.ereader.util.Utf8;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -109,6 +110,16 @@ public class ReaderCanvas extends Canvas {
             if (listener != null) {
                 listener.closeReader();
             }
+        } else if (keyCode == KEY_NUM7) {
+            BookmarkStore.toggle(currentPath, title, pageIndex);
+            repaint();
+        } else if (keyCode == KEY_NUM8) {
+            int bookmarkedPage = BookmarkStore.findPage(currentPath);
+            if (bookmarkedPage >= 0 && bookmarkedPage < getPageCount()) {
+                pageIndex = bookmarkedPage;
+                notifyPositionChanged();
+                repaint();
+            }
         } else if (keyCode == KEY_STAR) {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
             repaint();
@@ -162,6 +173,8 @@ public class ReaderCanvas extends Canvas {
         if (pageCount > 0) {
             g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, getWidth() - 70, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
         }
+        g.drawString("7 mark  8 jump", 8, getHeight() - 12,
+                     Graphics.TOP | Graphics.LEFT);
     }
 
     private Font getFontForLevel(int level) {
