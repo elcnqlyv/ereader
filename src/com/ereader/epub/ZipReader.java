@@ -156,7 +156,9 @@ public final class ZipReader {
         try {
             while ((count = input.read(compressed)) != -1) {
                 inflater.setInput(compressed, 0, count, false);
-                while (inflater.getAvailIn() > 0) {
+                boolean checkedWithoutInput = false;
+                while (inflater.getAvailIn() > 0 || !checkedWithoutInput) {
+                    checkedWithoutInput = inflater.getAvailIn() == 0;
                     inflater.setOutput(decompressed, 0, decompressed.length);
                     int result = inflater.inflate(com.jcraft.jzlib.JZlib.Z_NO_FLUSH);
                     int produced = decompressed.length - inflater.getAvailOut();
@@ -173,6 +175,9 @@ public final class ZipReader {
                     if (result != com.jcraft.jzlib.JZlib.Z_OK
                             && result != com.jcraft.jzlib.JZlib.Z_BUF_ERROR) {
                         throw new IOException("Invalid deflated EPUB entry");
+                    }
+                    if (inflater.getAvailIn() == 0 && result == com.jcraft.jzlib.JZlib.Z_BUF_ERROR) {
+                        break;
                     }
                 }
             }
