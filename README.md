@@ -46,6 +46,7 @@ The file browser uses JSR-75 `FileConnection` and starts at
 rendered alongside plain text and Markdown files. Opening an EPUB may request
 file access once; accept that request to allow the book to be read.
 
-The JAD is required by many Nokia phones as the installation descriptor. It
-must remain beside the JAR and should be opened to install the MIDlet; opening
-the JAR directly can show a “supportive file” or “invalid application” error.
+The JAR contains the complete MIDlet manifest and can be installed directly on
+phones that do not expose JAD files. The JAD is optional metadata for phones
+that require descriptor-based installation. The JAR also declares `/logo.png`
+as its MIDlet icon.
