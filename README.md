@@ -45,3 +45,7 @@ The file browser uses JSR-75 `FileConnection` and starts at
 `file:///E:/`. EPUB files are read through the OPF spine and XHTML text is
 rendered alongside plain text and Markdown files. Opening an EPUB may request
 file access once; accept that request to allow the book to be read.
+
+The JAD is required by many Nokia phones as the installation descriptor. It
+must remain beside the JAR and should be opened to install the MIDlet; opening
+the JAR directly can show a “supportive file” or “invalid application” error.

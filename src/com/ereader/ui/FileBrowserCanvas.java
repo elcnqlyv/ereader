@@ -120,6 +120,7 @@ public class FileBrowserCanvas extends Canvas {
         Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL);
         g.setFont(font);
         g.drawString("File Browser", 4, 4, Graphics.TOP | Graphics.LEFT);
+        Theme.drawLogo(g, getWidth());
 
         int rowHeight = font.getHeight() + 4;
         int footerHeight = font.getHeight() + 6;

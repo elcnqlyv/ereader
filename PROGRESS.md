@@ -164,6 +164,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - EPUB loading now reuses one JSR-75 file connection for the complete book, avoiding repeated permission prompts for each ZIP entry
 - EPUB spine chapters are now collected with one sequential ZIP scan instead of rescanning the archive for every chapter
 - reader titles are width-limited, the footer reserves a dedicated back row, and common bullet glyphs are normalized to ASCII markers
+- restored the last device-accepted ZIP loading path after `v0.1.6` produced an invalid-application report, and packaged the supplied logo as a cached 72x39 resource on every main screen
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 

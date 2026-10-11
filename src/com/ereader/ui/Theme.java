@@ -1,10 +1,25 @@
 package com.ereader.ui;
 
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
+
 public final class Theme {
     public static final int SEPIA = 0;
     public static final int GRUVBOX = 1;
+    private static Image logo;
 
     private Theme() {
+    }
+
+    public static void drawLogo(Graphics g, int width) {
+        try {
+            if (logo == null) {
+                logo = Image.createImage("/logo.png");
+            }
+            g.drawImage(logo, Math.max(0, width - logo.getWidth() - 2), 0,
+                    Graphics.TOP | Graphics.LEFT);
+        } catch (Exception ignored) {
+        }
     }
 
     public static int background(int theme) {
