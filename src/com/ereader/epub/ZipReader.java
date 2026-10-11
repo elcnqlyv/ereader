@@ -12,6 +12,7 @@ import javax.microedition.io.InputConnection;
 
 public final class ZipReader {
     private static final int LOCAL_SIGNATURE = 0x04034b50;
+    private static final int DESCRIPTOR_SIGNATURE = 0x08074b50;
 
     private ZipReader() {
     }
@@ -24,7 +25,12 @@ public final class ZipReader {
             input = connection.openInputStream();
             DataInputStream data = new DataInputStream(input);
             while (true) {
-                int signature = readLittleEndianInt(data);
+                int signature;
+                try {
+                    signature = readLittleEndianInt(data);
+                } catch (java.io.EOFException endOfFile) {
+                    return null;
+                }
                 if (signature != LOCAL_SIGNATURE) {
                     return null;
                 }
@@ -32,7 +38,7 @@ public final class ZipReader {
                 data.readUnsignedByte();
                 int flags = readLittleEndianShort(data);
                 int method = readLittleEndianShort(data);
-                skipFully(data, 16);
+                skipFully(data, 8);
                 long compressedSize = readLittleEndianInt(data) & 0xffffffffL;
                 long uncompressedSize = readLittleEndianInt(data) & 0xffffffffL;
                 int nameLength = readLittleEndianShort(data);
@@ -42,14 +48,22 @@ public final class ZipReader {
                 skipFully(data, extraLength);
                 String name = Utf8.decode(nameBytes);
 
-                if ((flags & 0x08) != 0) {
-                    throw new IOException("ZIP data descriptors are not supported");
-                }
-                LimitedInputStream entry = new LimitedInputStream(data, compressedSize);
                 if (wantedName.equals(name)) {
+                    if ((flags & 0x08) != 0) {
+                        byte[] result = inflateUnknownSize(data, method, uncompressedSize);
+                        skipDataDescriptor(data);
+                        return result;
+                    }
+                    LimitedInputStream entry = new LimitedInputStream(data, compressedSize);
                     return inflate(entry, method, uncompressedSize);
                 }
-                skipFully(entry, compressedSize);
+                if ((flags & 0x08) != 0) {
+                    skipUnknownSizeEntry(data, method, uncompressedSize);
+                    skipDataDescriptor(data);
+                } else {
+                    LimitedInputStream entry = new LimitedInputStream(data, compressedSize);
+                    skipFully(entry, compressedSize);
+                }
             }
         } finally {
             if (input != null) {
@@ -70,7 +84,7 @@ public final class ZipReader {
     private static byte[] inflate(InputStream input, int method, long expectedSize) throws IOException {
         InputStream decoded = input;
         if (method == 8) {
-            return inflateDeflated(input, expectedSize);
+            return inflateDeflated(input, expectedSize, 1);
         } else if (method != 0) {
             throw new IOException("Unsupported ZIP compression method: " + method);
         }
@@ -84,12 +98,34 @@ public final class ZipReader {
         return output.toByteArray();
     }
 
+    private static byte[] inflateUnknownSize(InputStream input, int method,
+            long expectedSize) throws IOException {
+        if (method != 8) {
+            throw new IOException("ZIP stored entries with data descriptors are unsupported");
+        }
+        return inflateDeflated(input, expectedSize);
+    }
+
+    private static void skipUnknownSizeEntry(InputStream input, int method,
+            long expectedSize) throws IOException {
+        if (method == 8) {
+            inflateDeflated(input, expectedSize, 1);
+            return;
+        }
+        throw new IOException("ZIP stored entries with data descriptors are unsupported");
+    }
+
     private static byte[] inflateDeflated(InputStream input, long expectedSize) throws IOException {
+        return inflateDeflated(input, expectedSize, 512);
+    }
+
+    private static byte[] inflateDeflated(InputStream input, long expectedSize,
+            int compressedBufferSize) throws IOException {
         com.jcraft.jzlib.Inflater inflater = new com.jcraft.jzlib.Inflater(
                 com.jcraft.jzlib.JZlib.MAX_WBITS, true);
         ByteArrayOutputStream output = new ByteArrayOutputStream(
                 (int) Math.min(expectedSize, 32768));
-        byte[] compressed = new byte[512];
+        byte[] compressed = new byte[compressedBufferSize];
         byte[] decompressed = new byte[512];
         int count;
         try {
@@ -114,6 +150,16 @@ public final class ZipReader {
             throw new IOException("Truncated deflated EPUB entry");
         } finally {
             inflater.end();
+        }
+
+    }
+
+    private static void skipDataDescriptor(DataInputStream input) throws IOException {
+        int first = readLittleEndianInt(input);
+        if (first == DESCRIPTOR_SIGNATURE) {
+            skipFully(input, 12);
+        } else {
+            skipFully(input, 8);
         }
     }
 

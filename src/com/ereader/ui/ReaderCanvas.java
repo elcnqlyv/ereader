@@ -156,9 +156,9 @@ public class ReaderCanvas extends Canvas {
         g.setFont(font);
         g.setColor(Theme.foreground(settings.getTheme()));
 
-        int margin = 8;
-        int pageHeight = getHeight() - 24;
         int lineHeight = font.getHeight() + 2;
+        int footerHeight = (font.getHeight() * 2) + 6;
+        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
         int maxLines = pageHeight / lineHeight;
         int start = pageIndex * maxLines;
         int end = start + maxLines;
@@ -171,18 +171,20 @@ public class ReaderCanvas extends Canvas {
                 if (line == null) {
                     continue;
                 }
-                g.drawString(line, margin, y, Graphics.TOP | Graphics.LEFT);
+                g.drawString(line, 8, y, Graphics.TOP | Graphics.LEFT);
                 y += lineHeight;
             }
         }
 
         g.setColor(Theme.accent(settings.getTheme()));
         int pageCount = getPageCount();
+        int footerY = getHeight() - footerHeight;
         if (pageCount > 0) {
-            g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, getWidth() - 70, getHeight() - 12, Graphics.TOP | Graphics.LEFT);
+            g.drawString("Page " + (pageIndex + 1) + "/" + pageCount, 8, footerY,
+                    Graphics.TOP | Graphics.LEFT);
         }
-        g.drawString("7 mark 8 jump  #" + fontName(), 8, getHeight() - 12,
-                     Graphics.TOP | Graphics.LEFT);
+        g.drawString("7 mark  8 jump  # " + fontName(), 8,
+                footerY + font.getHeight() + 2, Graphics.TOP | Graphics.LEFT);
     }
 
     private void cycleFont() {
@@ -305,7 +307,8 @@ public class ReaderCanvas extends Canvas {
         }
         Font font = getFontForLevel(settings.getFontLevel());
         int lineHeight = font.getHeight() + 2;
-        int pageHeight = getHeight() - 24;
+        int footerHeight = (font.getHeight() * 2) + 6;
+        int pageHeight = Math.max(lineHeight, getHeight() - footerHeight - 14);
         int maxLines = pageHeight / lineHeight;
         return (lines.length + maxLines - 1) / Math.max(1, maxLines);
     }
