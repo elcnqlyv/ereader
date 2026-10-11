@@ -66,7 +66,11 @@ MIDlet-Jar-Size: ${jar.size}
     </target>
 
     <target name="run" depends="package">
-        <java jar="${microemu}" fork="true" failonerror="true">
+        <java classname="org.microemu.app.Main" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="${microemu}" />
+                <fileset dir="${lib.dir}" includes="*.jar" />
+            </classpath>
             <arg value="${dist.dir}/${jad.name}" />
         </java>
     </target>

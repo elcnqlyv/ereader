@@ -1,9 +1,13 @@
 package com.ereader.ui;
 
 import com.ereader.model.Settings;
+import java.util.Enumeration;
+import java.util.Vector;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
 
 public class FileBrowserCanvas extends Canvas {
     public interface PathSelectionListener {
@@ -13,6 +17,8 @@ public class FileBrowserCanvas extends Canvas {
 
     private Settings settings;
     private String[] paths;
+    private String[] labels;
+    private String currentPath;
     private int selectedIndex;
     private PathSelectionListener listener;
 
@@ -32,13 +38,40 @@ public class FileBrowserCanvas extends Canvas {
     }
 
     private void buildPaths() {
-        paths = new String[] {
-            "file:///E:/",
-            "file:///E:/Books/",
-            "file:///E:/Books/sample.txt",
-            "file:///E:/sample.txt",
-            "file:///E:/notes.txt"
-        };
+        currentPath = settings.getRootPath();
+        loadDirectory();
+    }
+
+    private void loadDirectory() {
+        Vector pathList = new Vector();
+        Vector labelList = new Vector();
+        FileConnection connection = null;
+        try {
+            connection = (FileConnection) Connector.open(currentPath, Connector.READ);
+            Enumeration entries = connection.list();
+            while (entries.hasMoreElements()) {
+                String name = (String) entries.nextElement();
+                pathList.addElement(currentPath + name);
+                labelList.addElement(name);
+            }
+        } catch (Exception ex) {
+            labelList.addElement("Unable to read " + currentPath);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        paths = new String[pathList.size()];
+        labels = new String[labelList.size()];
+        for (int i = 0; i < pathList.size(); i++) {
+            paths[i] = (String) pathList.elementAt(i);
+        }
+        for (int i = 0; i < labelList.size(); i++) {
+            labels[i] = (String) labelList.elementAt(i);
+        }
         selectedIndex = 0;
     }
 
@@ -47,14 +80,25 @@ public class FileBrowserCanvas extends Canvas {
         if (action == UP) {
             selectedIndex = Math.max(0, selectedIndex - 1);
         } else if (action == DOWN) {
-            selectedIndex = Math.min(paths.length - 1, selectedIndex + 1);
+            selectedIndex = Math.min(Math.max(0, paths.length - 1), selectedIndex + 1);
         } else if (keyCode == KEY_NUM0) {
-            if (listener != null) {
+            if (!settings.getRootPath().equals(currentPath)) {
+                int end = currentPath.lastIndexOf('/', currentPath.length() - 2);
+                currentPath = currentPath.substring(0, end + 1);
+                loadDirectory();
+            } else if (listener != null) {
                 listener.closeBrowser();
             }
         } else if (action == FIRE || action == LEFT || action == RIGHT) {
-            if (listener != null) {
-                listener.openPath(paths[selectedIndex]);
+            if (paths.length == 0) {
+                return;
+            }
+            String selectedPath = paths[selectedIndex];
+            if (selectedPath.charAt(selectedPath.length() - 1) == '/') {
+                currentPath = selectedPath;
+                loadDirectory();
+            } else if (listener != null) {
+                listener.openPath(selectedPath);
             }
         }
         repaint();
@@ -69,8 +113,8 @@ public class FileBrowserCanvas extends Canvas {
         g.drawString("File Browser", 4, 4, Graphics.TOP | Graphics.LEFT);
 
         int y = 22;
-        for (int i = 0; i < paths.length; i++) {
-            String label = paths[i];
+        for (int i = 0; i < labels.length; i++) {
+            String label = labels[i];
             if (i == selectedIndex) {
                 g.setColor(Theme.accent(settings.getTheme()));
                 g.fillRect(0, y - 2, getWidth(), 14);

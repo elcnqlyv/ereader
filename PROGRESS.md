@@ -136,8 +136,9 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - keyboard navigation from the library to files (`1`) and settings (`2`), plus back (`0`)
 - last reader page persisted per book in RMS and restored when reopening
 - reader input streams and connections closed after loading
+- JSR-75 `FileConnection` support added for real directory enumeration
 
-The file browser still uses placeholder entries because the current API jars do not include JSR-75 `FileConnection`; real SD-card enumeration requires adding a compatible JSR-75 API/runtime provider.
+The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
 Remaining Phase 1 files and behavior:
 
@@ -151,13 +152,13 @@ Remaining Phase 1 files and behavior:
 - [ ] `src/com/ereader/ui/Theme.java` — Sepia + Gruvbox Dark themes
 - [ ] `src/com/ereader/ui/ReaderCanvas.java` — paginated text reader
 - [ ] `src/com/ereader/ui/LibraryCanvas.java` — library list
-- [ ] `src/com/ereader/ui/FileBrowserCanvas.java` — real SD-card file browser (placeholder navigation exists)
+- [x] `src/com/ereader/ui/FileBrowserCanvas.java` — real SD-card file browser with directory navigation
 - [x] `src/com/ereader/ui/SettingsCanvas.java` — settings screen
 - [x] `src/com/ereader/EReaderMidlet.java` — real MIDlet (initial implementation)
 
 **Phase 1 exit criteria:**
 - App installs and runs on the Asha 302
-- File browser navigates the SD card, opens `.txt` files
+- [x] File browser navigates the SD card, opens `.txt` files
 - Reader paginates, arrow keys page forward/back
 - Theme toggle (`*`), font size toggle (`#`)
 - [x] Position saved while reading, restored on reopen

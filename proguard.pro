@@ -4,6 +4,7 @@
 -libraryjars lib/cldcapi11.jar
 -libraryjars lib/midpapi20.jar
 -libraryjars lib/microemu-nokiaui.jar
+-libraryjars lib/microemu-jsr-75.jar
 
 -dontoptimize
 -dontshrink
