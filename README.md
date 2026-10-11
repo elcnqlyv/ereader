@@ -51,5 +51,5 @@ phones that do not expose JAD files. The JAD is optional metadata for phones
 that require descriptor-based installation. The JAR also declares `/logo.png`
 as its MIDlet icon.
 
-The packaged logo uses a transparent background so it follows the active
-screen theme.
+The packaged logo is used as the application icon. It is not drawn in the
+upper-right corner of the reader screens.

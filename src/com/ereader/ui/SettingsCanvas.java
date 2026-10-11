@@ -71,8 +71,6 @@ public class SettingsCanvas extends Canvas {
         Font font = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL);
         g.setFont(font);
         g.drawString("Settings", 4, 4, Graphics.TOP | Graphics.LEFT);
-        Theme.drawLogo(g, getWidth());
-
         String[] items = {
             (settings.getTheme() == Settings.THEME_SEPIA ? "[x] " : "[ ] ") + "Theme: Sepia",
             (settings.getTheme() == Settings.THEME_GRUVBOX ? "[x] " : "[ ] ") + "Theme: Gruvbox",

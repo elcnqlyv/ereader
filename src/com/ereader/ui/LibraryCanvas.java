@@ -78,8 +78,6 @@ public class LibraryCanvas extends Canvas {
         Font titleFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL);
         g.setFont(titleFont);
         g.drawString("Library", 4, 4, Graphics.TOP | Graphics.LEFT);
-        Theme.drawLogo(g, getWidth());
-
         int rowHeight = titleFont.getHeight() + 4;
         int footerHeight = titleFont.getHeight() + 6;
         int visibleRows = Math.max(1, (getHeight() - 28 - footerHeight) / rowHeight);

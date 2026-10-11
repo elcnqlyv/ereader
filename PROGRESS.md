@@ -171,6 +171,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - fixed the remaining EPUB truncation bug by preserving compressed bytes that the inflater reads ahead of ZIP data descriptors
 - prepared v0.1.10 as a direct standalone JAR release; the convenience ZIP is no longer included
 - changed EPUB passes to use a fresh JSR-75 file connection each time, avoiding the Asha 302 "InputStream is already open" limitation
+- replaced the packaged icon with the supplied All Aboard artwork and removed all in-app upper-right logo drawing
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 

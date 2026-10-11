@@ -166,7 +166,6 @@ public class ReaderCanvas extends Canvas {
 
         g.drawString(fitTitle(title == null ? "Reader" : title, getWidth() - 88),
                 8, 4, Graphics.TOP | Graphics.LEFT);
-        Theme.drawLogo(g, getWidth());
         if (lines != null) {
             for (int i = start; i < end && i < lines.length; i++) {
                 String line = lines[i];
