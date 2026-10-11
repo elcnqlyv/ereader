@@ -52,4 +52,6 @@ that require descriptor-based installation. The JAR also declares `/logo.png`
 as its MIDlet icon.
 
 The packaged logo is used as the application icon. It is not drawn in the
-upper-right corner of the reader screens.
+upper-right corner of the reader screens. Release builds force-clean their
+output directory so obsolete smoke-test classes cannot be carried into the
+JAR.

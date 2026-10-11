@@ -178,6 +178,8 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - reserved a real header band so long file names cannot overlap reader text
 - added reliable visible bookmark state with numeric-key fallbacks for mark/jump
 - added an EPUB table-of-contents screen built from spine chapter headings and chapter positions
+- removed stale smoke-test output from the release packaging path by forcing a clean output directory before each release build
+- replaced the icon with the latest attached `logo-png.png`, preserving its portrait artwork and transparent background in a centered 48x48 icon
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
