@@ -85,6 +85,16 @@ export PATH=$JAVA_HOME/bin:$PATH
   firmware, memory, or device-runtime issue. If it displays `Launch probe OK`,
   the EReader startup graph remains the relevant layer.
 
+### 🔬 2026-10-11 — Added an EReader-class startup probe
+
+- Added `ant minimal`, producing `dist/ereader-core-probe.jar`.
+- This probe uses the exact application class name
+  `com.ereader.EReaderMidlet` and the same MIDP/CLDC manifest, but its class
+  contains only `Display`, one blank `Canvas`, and no EReader dependencies.
+- `EReader core OK` means the class name and manifest are accepted. A crash
+  here would point to a class-name/install conflict; a successful launch means
+  the original EReader startup dependency graph is the failing layer.
+
 ### ✅ 1. Toolchain installed and verified
 
 - [x] `lib32-libxtst`, `lib32-libxrender`, `lib32-libxi` installed

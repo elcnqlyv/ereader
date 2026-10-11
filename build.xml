@@ -122,6 +122,51 @@ MIDlet-Jar-Size: ${probe.jar.size}
 </echo>
     </target>
 
+    <target name="minimal-clean">
+        <delete dir="${build.dir}/minimal-classes" />
+        <delete dir="${build.dir}/minimal-preverified" />
+        <delete file="${dist.dir}/ereader-core-probe.jar" />
+        <delete file="${dist.dir}/ereader-core-probe.jad" />
+    </target>
+
+    <target name="minimal-compile" depends="minimal-clean">
+        <mkdir dir="${build.dir}/minimal-classes" />
+        <javac srcdir="diagnostic/minimal-src"
+               destdir="${build.dir}/minimal-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="minimal-preverify" depends="minimal-compile">
+        <mkdir dir="${build.dir}/minimal-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/minimal.pro" />
+        </java>
+    </target>
+
+    <target name="minimal" depends="minimal-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-core-probe.jar"
+             basedir="${build.dir}/minimal-preverified"
+             manifest="diagnostic/MINIMAL-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-core-probe.jar" property="minimal.jar.size" />
+        <echo file="${dist.dir}/ereader-core-probe.jad">MIDlet-1: EReader core probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader core probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-core-probe.jar
+MIDlet-Jar-Size: ${minimal.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />
