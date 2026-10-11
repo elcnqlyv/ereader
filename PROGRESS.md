@@ -181,6 +181,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - removed stale smoke-test output from the release packaging path by forcing a clean output directory before each release build
 - replaced the icon with the latest attached `logo-png.png`, preserving its portrait artwork and transparent background in a centered 48x48 icon
 - reverted the latest icon resource to an opaque 64-color indexed PNG after the Asha launcher crashed while parsing the truecolor RGBA icon; this retains the new artwork using the device-safe format from v0.1.8
+- restored the exact v0.1.8 icon bytes after the phone continued crashing with converted replacements; this is the last confirmed launcher-safe resource
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
