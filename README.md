@@ -16,6 +16,14 @@ The generated MIDlet files are written to `dist/EReader.jar` and
 ant run
 ```
 
+Signing is intentionally opt-in and takes credentials on the command line;
+no keystore or password is stored in the repository:
+
+```bash
+ant sign -Dsign.keystore=/path/to/keystore \
+  -Dsign.storepass=changeit -Dsign.alias=ereader
+```
+
 ## Controls
 
 - Library: `1` opens the file browser, `2` opens settings.

@@ -76,4 +76,22 @@ MIDlet-Jar-Size: ${jar.size}
             <arg value="${dist.dir}/${jad.name}" />
         </java>
     </target>
+
+    <target name="sign" depends="package">
+        <fail unless="sign.keystore"
+              message="Use -Dsign.keystore=... to select the keystore." />
+        <fail unless="sign.storepass"
+              message="Use -Dsign.storepass=... to provide the keystore password." />
+        <fail unless="sign.alias"
+              message="Use -Dsign.alias=... to select the signing alias." />
+        <exec executable="${jdk8}/bin/jarsigner" failonerror="true">
+            <arg value="-keystore" />
+            <arg value="${sign.keystore}" />
+            <arg value="-storepass" />
+            <arg value="${sign.storepass}" />
+            <arg value="${dist.dir}/${jar.name}" />
+            <arg value="${sign.alias}" />
+        </exec>
+        <echo message="Signed ${dist.dir}/${jar.name}; update the JAD size if the signer changed the archive." />
+    </target>
 </project>
