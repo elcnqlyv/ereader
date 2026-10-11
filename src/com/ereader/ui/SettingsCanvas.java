@@ -67,11 +67,11 @@ public class SettingsCanvas extends Canvas {
         g.drawString("Settings", 4, 4, Graphics.TOP | Graphics.LEFT);
 
         String[] items = {
-            "Theme: Sepia",
-            "Theme: Gruvbox",
-            "Font: Small",
-            "Font: Medium",
-            "Font: Large"
+            (settings.getTheme() == Settings.THEME_SEPIA ? "[x] " : "[ ] ") + "Theme: Sepia",
+            (settings.getTheme() == Settings.THEME_GRUVBOX ? "[x] " : "[ ] ") + "Theme: Gruvbox",
+            (settings.getFontLevel() == Settings.FONT_SMALL ? "[x] " : "[ ] ") + "Font: Small",
+            (settings.getFontLevel() == Settings.FONT_MEDIUM ? "[x] " : "[ ] ") + "Font: Medium",
+            (settings.getFontLevel() == Settings.FONT_LARGE ? "[x] " : "[ ] ") + "Font: Large"
         };
 
         int y = 24;
