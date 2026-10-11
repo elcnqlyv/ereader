@@ -17,10 +17,7 @@ import java.util.Vector;
 import javax.microedition.lcdui.Display;
 import javax.microedition.midlet.MIDlet;
 
-public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
-        FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener,
-        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener, PageCanvas.PageListener,
-        TocCanvas.Listener {
+public class EReaderMidlet extends MIDlet {
 
     private Display display;
     private Settings settings;
@@ -38,7 +35,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             display = Display.getDisplay(this);
             settings = SettingsStore.load();
             libraryCanvas = new LibraryCanvas(settings);
-            libraryCanvas.setBookSelectionListener(this);
+            libraryCanvas.setBookSelectionListener(new LibraryListener(this));
         }
         display.setCurrent(libraryCanvas);
     }
@@ -71,7 +68,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         if (display != null) {
             if (browserCanvas == null) {
                 browserCanvas = new FileBrowserCanvas(settings);
-                browserCanvas.setPathSelectionListener(this);
+                browserCanvas.setPathSelectionListener(new BrowserListener(this));
             }
             browserCanvas.refresh();
             display.setCurrent(browserCanvas);
@@ -234,35 +231,170 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     private void ensureReader() {
         if (readerCanvas == null) {
             readerCanvas = new ReaderCanvas(settings);
-            readerCanvas.setReaderListener(this);
+            readerCanvas.setReaderListener(new ReaderListener(this));
         }
     }
 
     private void ensureSettings() {
         if (settingsCanvas == null) {
             settingsCanvas = new SettingsCanvas(settings);
-            settingsCanvas.setSettingsChangeListener(this);
+            settingsCanvas.setSettingsChangeListener(new SettingsListener(this));
         }
     }
 
     private void ensureSearch() {
         if (searchCanvas == null) {
             searchCanvas = new SearchCanvas();
-            searchCanvas.setSearchListener(this);
+            searchCanvas.setSearchListener(new SearchListener(this));
         }
     }
 
     private void ensurePagePrompt() {
         if (pageCanvas == null) {
             pageCanvas = new PageCanvas();
-            pageCanvas.setPageListener(this);
+            pageCanvas.setPageListener(new PageListener(this));
         }
     }
 
     private void ensureToc() {
         if (tocCanvas == null) {
             tocCanvas = new TocCanvas(settings);
-            tocCanvas.setListener(this);
+            tocCanvas.setListener(new TocListener(this));
+        }
+    }
+
+    private static final class LibraryListener
+            implements LibraryCanvas.BookSelectionListener {
+        private final EReaderMidlet midlet;
+
+        LibraryListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void openBook(Book book) {
+            midlet.openBook(book);
+        }
+
+        public void openBrowser() {
+            midlet.openBrowser();
+        }
+
+        public void openSettings() {
+            midlet.openSettings();
+        }
+    }
+
+    private static final class BrowserListener
+            implements FileBrowserCanvas.PathSelectionListener {
+        private final EReaderMidlet midlet;
+
+        BrowserListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void openPath(String path) {
+            midlet.openPath(path);
+        }
+
+        public void closeBrowser() {
+            midlet.closeBrowser();
+        }
+    }
+
+    private static final class SettingsListener
+            implements SettingsCanvas.SettingsChangeListener {
+        private final EReaderMidlet midlet;
+
+        SettingsListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void settingsChanged(Settings settings) {
+            midlet.settingsChanged(settings);
+        }
+
+        public void closeSettings() {
+            midlet.closeSettings();
+        }
+    }
+
+    private static final class ReaderListener
+            implements ReaderCanvas.ReaderListener {
+        private final EReaderMidlet midlet;
+
+        ReaderListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void positionChanged(int page) {
+            midlet.positionChanged(page);
+        }
+
+        public void closeReader() {
+            midlet.closeReader();
+        }
+
+        public void openSearch() {
+            midlet.openSearch();
+        }
+
+        public void openPagePrompt() {
+            midlet.openPagePrompt();
+        }
+
+        public void openToc() {
+            midlet.openToc();
+        }
+    }
+
+    private static final class SearchListener
+            implements SearchCanvas.SearchListener {
+        private final EReaderMidlet midlet;
+
+        SearchListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void search(String query) {
+            midlet.search(query);
+        }
+
+        public void cancelSearch() {
+            midlet.cancelSearch();
+        }
+    }
+
+    private static final class PageListener
+            implements PageCanvas.PageListener {
+        private final EReaderMidlet midlet;
+
+        PageListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void goToPage(String value) {
+            midlet.goToPage(value);
+        }
+
+        public void cancelPage() {
+            midlet.cancelPage();
+        }
+    }
+
+    private static final class TocListener
+            implements TocCanvas.Listener {
+        private final EReaderMidlet midlet;
+
+        TocListener(EReaderMidlet midlet) {
+            this.midlet = midlet;
+        }
+
+        public void selectTocEntry(int index) {
+            midlet.selectTocEntry(index);
+        }
+
+        public void closeToc() {
+            midlet.closeToc();
         }
     }
 }

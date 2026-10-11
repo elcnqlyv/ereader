@@ -142,6 +142,18 @@ usage.
   and TOC screens instead of resolving all of them during `startApp()`. This
   keeps EPUB and reader classes out of the initial library startup path.
 
+### 🔬 2026-10-11 — Isolated startup listener interfaces
+
+- The full MIDlet still crashed even though every feature probe passed.
+- The startup class previously implemented seven listener interfaces, forcing
+  the Asha verifier to resolve the complete UI graph from the MIDlet class
+  itself.
+- Replaced those declarations with small lazy listener adapters. The MIDlet
+  now implements only `MIDlet`; adapters are attached as each screen is
+  created.
+- Clean package and MicroEmulator startup passed with class-file major
+  version 45.
+
 ### 🔬 2026-10-11 — Added a library/settings screen probe
 
 - Added `ant screens`, producing `dist/ereader-screens-probe.jar`.
