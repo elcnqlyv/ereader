@@ -144,6 +144,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - file browser filters to supported text books and library entries use readable filenames
 - settings screen shows the active theme and font choice
 - reader supports bookmark toggle (`7`) and jump to the saved bookmark (`8`)
+- reader supports forward in-book search from the current page (`9`)
 - EPUB foundation dependencies and streaming ZIP/XML helpers are now present
 - first EPUB spine chapter can be extracted, XHTML-stripped, and opened in the reader
 - all readable OPF spine chapters are concatenated with chapter breaks
@@ -196,7 +197,7 @@ Remaining Phase 1 files and behavior:
 
 ### 🔵 Phase 3 — Polish & signing
 
-- [ ] In-book search (stream text, match offsets)
+- [x] In-book search (forward text match)
 - [x] Bookmarks UI (inline toggle and jump)
 - [ ] Go-to-page / go-to-percent dialog
 - [ ] Cover thumbnails on library screen (decode cover image, downscale)

@@ -17,6 +17,7 @@ public class ReaderCanvas extends Canvas {
     public interface ReaderListener {
         void positionChanged(int page);
         void closeReader();
+        void openSearch();
     }
 
     private Settings settings;
@@ -119,6 +120,10 @@ public class ReaderCanvas extends Canvas {
                 pageIndex = bookmarkedPage;
                 notifyPositionChanged();
                 repaint();
+            }
+        } else if (keyCode == KEY_NUM9) {
+            if (listener != null) {
+                listener.openSearch();
             }
         } else if (keyCode == KEY_STAR) {
             settings.setTheme(settings.getTheme() == Settings.THEME_SEPIA ? Settings.THEME_GRUVBOX : Settings.THEME_SEPIA);
@@ -276,5 +281,24 @@ public class ReaderCanvas extends Canvas {
         if (listener != null) {
             listener.positionChanged(pageIndex);
         }
+    }
+
+    public boolean search(String query) {
+        if (query == null || query.length() == 0 || lines == null) {
+            return false;
+        }
+        String target = query.toLowerCase();
+        Font font = getFontForLevel(settings.getFontLevel());
+        int maxLines = Math.max(1, (getHeight() - 24) / (font.getHeight() + 2));
+        int start = Math.min(lines.length, (pageIndex + 1) * maxLines);
+        for (int i = start; i < lines.length; i++) {
+            if (lines[i].toLowerCase().indexOf(target) >= 0) {
+                pageIndex = i / maxLines;
+                notifyPositionChanged();
+                repaint();
+                return true;
+            }
+        }
+        return false;
     }
 }

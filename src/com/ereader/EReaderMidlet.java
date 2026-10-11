@@ -8,6 +8,7 @@ import com.ereader.store.SettingsStore;
 import com.ereader.ui.FileBrowserCanvas;
 import com.ereader.ui.LibraryCanvas;
 import com.ereader.ui.ReaderCanvas;
+import com.ereader.ui.SearchCanvas;
 import com.ereader.ui.SettingsCanvas;
 import java.util.Vector;
 import javax.microedition.lcdui.Display;
@@ -15,7 +16,7 @@ import javax.microedition.midlet.MIDlet;
 
 public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelectionListener,
         FileBrowserCanvas.PathSelectionListener, SettingsCanvas.SettingsChangeListener,
-        ReaderCanvas.ReaderListener {
+        ReaderCanvas.ReaderListener, SearchCanvas.SearchListener {
 
     private Display display;
     private Settings settings;
@@ -23,6 +24,7 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
     private FileBrowserCanvas browserCanvas;
     private ReaderCanvas readerCanvas;
     private SettingsCanvas settingsCanvas;
+    private SearchCanvas searchCanvas;
     private Book currentBook;
 
     public void startApp() {
@@ -37,6 +39,8 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
             readerCanvas.setReaderListener(this);
             settingsCanvas = new SettingsCanvas(settings);
             settingsCanvas.setSettingsChangeListener(this);
+            searchCanvas = new SearchCanvas();
+            searchCanvas.setSearchListener(this);
         }
         display.setCurrent(libraryCanvas);
     }
@@ -148,6 +152,25 @@ public class EReaderMidlet extends MIDlet implements LibraryCanvas.BookSelection
         if (display != null) {
             libraryCanvas.refresh();
             display.setCurrent(libraryCanvas);
+        }
+    }
+
+    public void openSearch() {
+        if (display != null) {
+            display.setCurrent(searchCanvas);
+        }
+    }
+
+    public void search(String query) {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
+            readerCanvas.search(query);
+        }
+    }
+
+    public void cancelSearch() {
+        if (display != null) {
+            display.setCurrent(readerCanvas);
         }
     }
 }
