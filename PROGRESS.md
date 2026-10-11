@@ -149,6 +149,7 @@ The initial Phase 1 source skeleton is now present. The current implementation h
 - EPUB foundation dependencies and streaming ZIP/XML helpers are now present
 - first EPUB spine chapter can be extracted, XHTML-stripped, and opened in the reader
 - all readable OPF spine chapters are concatenated with chapter breaks
+- KXML/JZlib are compile-time EPUB dependencies; final J2ME-compatible bundling remains a packaging task
 
 The file browser now enumerates directories through JSR-75 `FileConnection`. The MicroEmulator JSR-75 module is included for desktop testing; on the Asha 302, the device's built-in JSR-75 implementation is used.
 
