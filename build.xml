@@ -416,6 +416,73 @@ MIDlet-Jar-Size: ${browser.jar.size}
 </echo>
     </target>
 
+    <target name="reader-clean">
+        <delete dir="${build.dir}/reader-classes" />
+        <delete dir="${build.dir}/reader-preverified" />
+        <delete file="${dist.dir}/ereader-reader-probe.jar" />
+        <delete file="${dist.dir}/ereader-reader-probe.jad" />
+    </target>
+
+    <target name="reader-compile" depends="reader-clean">
+        <mkdir dir="${build.dir}/reader-classes" />
+        <javac srcdir="${src.dir}"
+               destdir="${build.dir}/reader-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${lib.dir}/microemu-jsr-75.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <include name="com/ereader/model/Book.java" />
+            <include name="com/ereader/model/Bookmark.java" />
+            <include name="com/ereader/model/Settings.java" />
+            <include name="com/ereader/store/BookmarkStore.java" />
+            <include name="com/ereader/util/Utf8.java" />
+            <include name="com/ereader/ui/Theme.java" />
+            <include name="com/ereader/ui/LibraryCanvas.java" />
+            <include name="com/ereader/ui/FileBrowserCanvas.java" />
+            <include name="com/ereader/ui/ReaderCanvas.java" />
+            <include name="com/ereader/epub/TocEntry.java" />
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+        <javac srcdir="diagnostic/reader-src"
+               destdir="${build.dir}/reader-classes"
+               source="1.4" target="1.4"
+               bootclasspath="${lib.dir}/cldcapi11.jar:${lib.dir}/midpapi20.jar:${lib.dir}/microemu-nokiaui.jar"
+               classpath="${build.dir}/reader-classes:${lib.dir}/microemu-jsr-75.jar"
+               encoding="UTF-8"
+               includeantruntime="false"
+               fork="true"
+               executable="${jdk8}/bin/javac">
+            <compilerarg value="-Xlint:-options" />
+        </javac>
+    </target>
+
+    <target name="reader-preverify" depends="reader-compile">
+        <mkdir dir="${build.dir}/reader-preverified" />
+        <java jar="${proguard}" fork="true" failonerror="true">
+            <arg value="@diagnostic/reader.pro" />
+        </java>
+    </target>
+
+    <target name="reader" depends="reader-preverify">
+        <mkdir dir="${dist.dir}" />
+        <jar destfile="${dist.dir}/ereader-reader-probe.jar"
+             basedir="${build.dir}/reader-preverified"
+             manifest="diagnostic/READER-MANIFEST.MF" />
+        <length file="${dist.dir}/ereader-reader-probe.jar" property="reader.jar.size" />
+        <echo file="${dist.dir}/ereader-reader-probe.jad">MIDlet-1: EReader reader probe, , com.ereader.EReaderMidlet
+MIDlet-Name: EReader reader probe
+MIDlet-Version: 0.1
+MIDlet-Vendor: Elchin
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-Jar-URL: ereader-reader-probe.jar
+MIDlet-Jar-Size: ${reader.jar.size}
+</echo>
+    </target>
+
     <target name="sign" depends="package">
         <fail unless="sign.keystore"
               message="Use -Dsign.keystore=... to select the keystore." />
